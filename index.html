@@ -52,27 +52,31 @@ input,select{font-family:inherit;font-size:16px}
 #stage{position:fixed;inset:0;display:grid;grid-template-columns:1fr auto;overflow:hidden}
 #stage.clean{grid-template-columns:1fr}
 #stage.clean #ctrl{display:none}
-#arenaWrap{position:relative;display:flex;flex-direction:column;align-items:center;padding:14px;gap:10px;min-width:0;min-height:0}
+#arenaWrap{position:relative;display:flex;flex-direction:column;align-items:center;padding:14px 14px 56px;gap:10px;min-width:0;min-height:0}
 .topbar{width:100%;display:flex;justify-content:space-between;align-items:center;gap:10px}
 .round-badge{font-family:Bungee;font-size:clamp(14px,2.2vw,22px);padding:6px 14px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid var(--line)}
 .stage-logo{font-size:clamp(22px,3.4vw,38px)}
 .room-chip{font-family:Bungee;font-size:clamp(12px,1.8vw,18px);color:var(--mut)}
 .room-chip b{color:var(--yel)}
 
-.catbox{width:min(100%,900px);text-align:center;padding:14px 18px;position:relative}
+.catbox{width:min(100%,900px);flex:none;height:clamp(150px,21vh,200px);text-align:center;padding:12px 18px;position:relative;display:flex;flex-direction:column;overflow:hidden}
+.catbox .cat-title{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.catbox .chips{flex:none;height:30px;overflow:hidden}
+.catbox .cat-count{flex:none;height:18px}
 .cat-kicker{font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);font-weight:800}
 .cat-title{font-family:Bungee;font-size:clamp(20px,3.6vw,44px);line-height:1.1;margin:6px 0 8px}
 .cat-title .hl{color:var(--yel)}
 .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
 .chip{padding:5px 12px;border-radius:999px;font-weight:800;font-size:14px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.25)}
 .cat-count{margin-top:6px;font-size:13px;color:var(--mut)}
-.catbox.spin .cat-title{animation:flick .09s steps(1) infinite;opacity:.8}
-.catbox.land{animation:land .5s cubic-bezier(.2,1.6,.4,1)}
+.catbox.spin .cat-title{opacity:.85}
+.catbox .fit{display:block;max-width:100%}
+.catbox.land .cat-title{animation:land .5s cubic-bezier(.2,1.6,.4,1)}
 @keyframes land{0%{transform:scale(.7)}100%{transform:scale(1)}}
 @keyframes flick{50%{transform:translateY(-2px)}}
 
 .arena{position:relative;flex:1;width:100%;min-height:0;display:flex;align-items:center;justify-content:center}
-.ring{position:relative;aspect-ratio:1;height:100%;max-width:100%;max-height:100%}
+.ring{position:relative;aspect-ratio:1;height:80%;max-width:80%;max-height:80%}
 .ring:before{content:"";position:absolute;inset:12%;border-radius:50%;border:2px dashed rgba(255,255,255,.1);background:radial-gradient(circle,rgba(255,59,78,.08),transparent 70%)}
 .pl{position:absolute;width:24%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:4px;transition:filter .4s,opacity .4s}
 .pl .ava{width:100%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 50% 35%,#343a86,#15183a 70%);border:4px solid rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 10px 30px rgba(0,0,0,.4)}
@@ -489,7 +493,7 @@ function stageInit(isHost){
   </div>${isHost?`<button class="btn sm toggle-clean" id="tclean" title="Ocultar/mostrar controles">👁</button>`:''}`;
   if(isHost){$('#tclean').onclick=()=>$('#stage').classList.toggle('clean')}
   requestAnimationFrame(stageLoop);
-  window.addEventListener('resize',()=>layoutRing(true));
+  window.addEventListener('resize',()=>{layoutRing(true);fitCat()});
 }
 function ringPos(i,n){const a=-Math.PI/2+i*2*Math.PI/n;return [50+38*Math.cos(a),50+38*Math.sin(a),a]}
 let ringSig='';
@@ -511,16 +515,23 @@ function nextAliveC(id){const a=S.players;const i=a.findIndex(p=>p.id===id);for(
 const pname=id=>id==='__host'?'El anfitrión':esc((S.players.find(p=>p.id===id)||{name:'?'}).name);
 const pav=id=>(S.players.find(p=>p.id===id)||{av:25}).av;
 let spinTimer=null,ovKey='',lastTickSec=-1;
+function fitCat(){
+  const t=$('#catT');if(!t)return;
+  if(!t.querySelector('.fit'))t.innerHTML='<span class="fit">'+t.innerHTML+'</span>';
+  const inner=t.querySelector('.fit');let f=Math.min(44,Math.max(18,t.clientWidth/15)),g=0;t.style.fontSize=f+'px';
+  while((inner.offsetHeight>t.clientHeight||inner.scrollWidth>t.clientWidth)&&f>12&&g++<40){f-=1.5;t.style.fontSize=f+'px'}
+}
+function setCatTitle(h){const t=$('#catT');if(!t)return;t.innerHTML='<span class="fit">'+h+'</span>';fitCat()}
 function renderCat(){
   const box=$('#catbox');if(!box)return;
-  if(S.phase==='lobby'){box.classList.remove('spin');$('#catK').textContent=`Jugadores ${S.players.length}/6`;$('#catT').innerHTML=`Uníte con el código <span class="hl">${ROOM}</span>`;$('#catC').innerHTML='';$('#catN').textContent='';$('#roundB').textContent='LOBBY';return}
+  if(S.phase==='lobby'){box.classList.remove('spin');$('#catK').textContent=`Jugadores ${S.players.length}/6`;setCatTitle(`Uníte con el código <span class="hl">${ROOM}</span>`);$('#catC').innerHTML='';$('#catN').textContent='';$('#roundB').textContent='LOBBY';return}
   $('#roundB').textContent='RONDA '+S.round;
   if(S.phase==='reveal'&&S.now&&Date.now()<S.phaseEnd+clockOff-900){
-    if(!spinTimer){box.classList.add('spin');$('#catK').textContent='Sorteando categoría…';spinTimer=setInterval(()=>{const h=catHTML(genCategory());$('#catT').innerHTML=h.title;$('#catC').innerHTML=h.chips;$('#catN').textContent='';if(ROLE==='host')beep(1200+rnd(400),.02,'square',.03)},90)}
+    if(!spinTimer){box.classList.add('spin');$('#catK').textContent='Sorteando categoría…';spinTimer=setInterval(()=>{const h=catHTML(genCategory());setCatTitle(h.title);$('#catC').innerHTML=h.chips;$('#catN').textContent='';if(ROLE==='host')beep(1200+rnd(400),.02,'square',.03)},90)}
     return;
   }
   if(spinTimer){clearInterval(spinTimer);spinTimer=null;box.classList.remove('spin');box.classList.remove('land');void box.offsetWidth;box.classList.add('land');beep(660,.12,'triangle',.12)}
-  const h=catHTML(S.cat);$('#catK').textContent='Categoría';$('#catT').innerHTML=h.title;$('#catC').innerHTML=h.chips;$('#catN').textContent=S.cat?`${S.cat.n} respuestas posibles`:'';
+  const h=catHTML(S.cat);$('#catK').textContent='Categoría';setCatTitle(h.title);$('#catC').innerHTML=h.chips;$('#catN').textContent=S.cat?`${S.cat.n} respuestas posibles`:'';
 }
 function renderOverlay(){
   const ov=$('#ov');if(!ov)return;let key=S.phase,h='';
