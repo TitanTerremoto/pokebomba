@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>PokéBomba</title>
+<meta name="theme-color" content="#0b0d1c">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0d1c;--bg2:#141736;--card:rgba(255,255,255,.06);--line:rgba(255,255,255,.12);
+  --txt:#f4f5ff;--mut:#a3a8d1;--red:#ff3b4e;--red2:#c3102a;--org:#ff9f1c;--yel:#ffd23f;--grn:#2ee59d;--blu:#4d7cff;
+  --r:18px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{background:var(--bg);color:var(--txt);font-family:Outfit,system-ui,sans-serif;overflow-x:hidden;
+  background-image:radial-gradient(1200px 700px at 15% -10%,#2a1b5c 0%,transparent 60%),radial-gradient(900px 600px at 110% 110%,#4a0f2a 0%,transparent 55%);
+  background-attachment:fixed}
+button{font-family:inherit;cursor:pointer;border:0;color:inherit}
+input,select{font-family:inherit;font-size:16px}
+.hidden{display:none!important}
+.logo{font-family:Bungee,sans-serif;letter-spacing:1px;line-height:1;background:linear-gradient(180deg,#fff 0%,#ffd23f 55%,#ff9f1c 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 0 #b3161f) drop-shadow(0 10px 18px rgba(0,0,0,.5))}
+.btn{padding:14px 20px;border-radius:14px;font-weight:800;font-size:17px;background:var(--card);border:1px solid var(--line);transition:transform .08s,filter .15s}
+.btn:active{transform:scale(.96)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.pri{background:linear-gradient(180deg,#ffd23f,#ff9f1c);color:#2a1300;border:0;box-shadow:0 5px 0 #b35f00}
+.btn.red{background:linear-gradient(180deg,#ff5a6a,#d9142f);border:0;box-shadow:0 5px 0 #7d0718}
+.btn.grn{background:linear-gradient(180deg,#48f0b0,#18b97a);color:#012b1a;border:0;box-shadow:0 5px 0 #0a6b45}
+.btn.sm{padding:8px 12px;font-size:14px;border-radius:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);backdrop-filter:blur(8px)}
+.mut{color:var(--mut)}
+.center{display:flex;align-items:center;justify-content:center}
+
+/* ---------- HOME / JOIN ---------- */
+.screen{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px;gap:22px}
+.home-logo{font-size:clamp(46px,12vw,96px);text-align:center}
+.tag{color:var(--mut);text-align:center;max-width:460px;font-size:17px}
+.panel{width:100%;max-width:420px;padding:22px;display:flex;flex-direction:column;gap:14px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:13px;color:var(--mut);font-weight:600;text-transform:uppercase;letter-spacing:.08em}
+.field input{padding:14px;border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.3);color:var(--txt);outline:none}
+.field input:focus{border-color:var(--yel)}
+.code-in{text-transform:uppercase;font-family:Bungee;font-size:26px!important;letter-spacing:.3em;text-align:center}
+.av-pick{display:flex;align-items:center;gap:14px}
+.av-pick img{width:96px;height:96px;background:radial-gradient(circle,#2a2f66,#15183a);border-radius:50%;border:3px solid var(--yel);object-fit:contain;padding:6px}
+.or{display:flex;align-items:center;gap:10px;color:var(--mut);font-size:13px}.or:before,.or:after{content:"";flex:1;height:1px;background:var(--line)}
+
+/* ---------- STAGE (host / spectator) ---------- */
+#stage{position:fixed;inset:0;display:grid;grid-template-columns:1fr auto;overflow:hidden}
+#stage.clean{grid-template-columns:1fr}
+#stage.clean #ctrl{display:none}
+#arenaWrap{position:relative;display:flex;flex-direction:column;align-items:center;padding:14px;gap:10px;min-width:0;min-height:0}
+.topbar{width:100%;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.round-badge{font-family:Bungee;font-size:clamp(14px,2.2vw,22px);padding:6px 14px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid var(--line)}
+.stage-logo{font-size:clamp(22px,3.4vw,38px)}
+.room-chip{font-family:Bungee;font-size:clamp(12px,1.8vw,18px);color:var(--mut)}
+.room-chip b{color:var(--yel)}
+
+.catbox{width:min(100%,900px);text-align:center;padding:14px 18px;position:relative}
+.cat-kicker{font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);font-weight:800}
+.cat-title{font-family:Bungee;font-size:clamp(20px,3.6vw,44px);line-height:1.1;margin:6px 0 8px}
+.cat-title .hl{color:var(--yel)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.chip{padding:5px 12px;border-radius:999px;font-weight:800;font-size:14px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.25)}
+.cat-count{margin-top:6px;font-size:13px;color:var(--mut)}
+.catbox.spin .cat-title{animation:flick .09s steps(1) infinite;opacity:.8}
+.catbox.land{animation:land .5s cubic-bezier(.2,1.6,.4,1)}
+@keyframes land{0%{transform:scale(.7)}100%{transform:scale(1)}}
+@keyframes flick{50%{transform:translateY(-2px)}}
+
+.arena{position:relative;flex:1;width:100%;min-height:0;display:flex;align-items:center;justify-content:center}
+.ring{position:relative;aspect-ratio:1;height:100%;max-width:100%;max-height:100%}
+.ring:before{content:"";position:absolute;inset:12%;border-radius:50%;border:2px dashed rgba(255,255,255,.1);background:radial-gradient(circle,rgba(255,59,78,.08),transparent 70%)}
+.pl{position:absolute;width:24%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:4px;transition:filter .4s,opacity .4s}
+.pl .ava{width:100%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 50% 35%,#343a86,#15183a 70%);border:4px solid rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.pl .ava img{width:84%;height:84%;object-fit:contain;filter:drop-shadow(0 4px 4px rgba(0,0,0,.4))}
+.pl .nm{font-weight:800;font-size:clamp(12px,1.7vh,20px);background:rgba(0,0,0,.45);padding:3px 10px;border-radius:999px;max-width:140%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pl.hold .ava{border-color:var(--red);box-shadow:0 0 0 6px rgba(255,59,78,.25),0 0 40px rgba(255,59,78,.7);animation:shake .35s infinite}
+.pl.next .ava{border-color:rgba(255,210,63,.6)}
+.pl.dead{filter:grayscale(1) brightness(.5)}
+.pl.dead .ava:after{content:"✖";position:absolute;font-size:300%;color:var(--red);font-weight:900;text-shadow:0 2px 8px #000}
+.pl.off{opacity:.45}
+.pl .off-tag{font-size:11px;color:var(--mut)}
+@keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-4deg)}75%{transform:rotate(4deg)}}
+
+.bomb{position:absolute;width:21%;aspect-ratio:1;transform:translate(-50%,-50%);transition:left .28s cubic-bezier(.3,1.4,.5,1),top .28s cubic-bezier(.3,1.4,.5,1);z-index:5;pointer-events:none}
+.bomb svg{width:100%;height:100%;overflow:visible}
+.bomb .num{position:absolute;left:50%;top:58%;transform:translate(-50%,-50%);font-family:Bungee;font-size:clamp(18px,5vh,54px);color:#fff;text-shadow:0 3px 0 #000}
+.bomb.hot svg .body{animation:throb .5s infinite}
+.bomb.hot .num{color:var(--yel);animation:throb .5s infinite}
+@keyframes throb{50%{transform:scale(1.08)}}
+.bomb svg .body{transform-origin:50% 60%;transform-box:fill-box}
+.spark{animation:sparkle .12s infinite alternate}
+@keyframes sparkle{from{transform:scale(.8) rotate(0)}to{transform:scale(1.25) rotate(40deg)}}
+
+.overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:18px;z-index:20;text-align:center;padding:20px}
+.overlay.dim{background:rgba(5,6,18,.72);backdrop-filter:blur(4px)}
+.big{font-family:Bungee;font-size:clamp(48px,12vw,160px);line-height:1}
+.cd{animation:pop .9s ease-out}
+@keyframes pop{0%{transform:scale(2.2);opacity:0}30%{transform:scale(1);opacity:1}100%{transform:scale(.9);opacity:.2}}
+.stop-title{color:var(--red);filter:drop-shadow(0 6px 0 #5c0010)}
+.boom-title{background:linear-gradient(180deg,#fff,#ffd23f 40%,#ff3b4e);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 6px 0 #5c0010)}
+.sub{font-size:clamp(18px,2.6vw,30px);font-weight:800}
+.flash{position:fixed;inset:0;background:#fff;z-index:50;pointer-events:none;animation:flash .6s forwards}
+@keyframes flash{from{opacity:1}to{opacity:0}}
+.shakeit{animation:bigshake .6s}
+@keyframes bigshake{0%,100%{transform:none}10%{transform:translate(-14px,8px)}20%{transform:translate(12px,-10px)}30%{transform:translate(-10px,-6px)}40%{transform:translate(8px,10px)}50%{transform:translate(-6px,4px)}70%{transform:translate(4px,-3px)}}
+.boomfx{position:absolute;width:0;height:0;z-index:30;pointer-events:none}
+.boomfx .ring2{position:absolute;left:-10px;top:-10px;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle,#fff 0,#ffd23f 25%,#ff9f1c 45%,#ff3b4e 65%,transparent 72%);animation:bloom .7s ease-out forwards}
+@keyframes bloom{to{transform:scale(28);opacity:0}}
+.boomfx i{position:absolute;width:12px;height:12px;border-radius:50%;background:var(--org);animation:shard .9s ease-out forwards}
+@keyframes shard{to{transform:translate(var(--dx),var(--dy)) scale(.2);opacity:0}}
+.winner-av{width:clamp(140px,26vh,260px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#ffd23f55,#15183a 70%);border:6px solid var(--yel);display:flex;align-items:center;justify-content:center;animation:float 2s ease-in-out infinite;box-shadow:0 0 80px #ffd23f66}
+.winner-av img{width:86%}
+@keyframes float{50%{transform:translateY(-12px)}}
+.confetti{position:fixed;top:-20px;width:10px;height:16px;z-index:40;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+
+/* controls sidebar */
+#ctrl{width:340px;border-left:1px solid var(--line);background:rgba(10,12,30,.75);backdrop-filter:blur(10px);display:flex;flex-direction:column;overflow:auto;padding:16px;gap:14px}
+#ctrl h3{font-family:Bungee;font-size:15px;letter-spacing:.05em;color:var(--yel)}
+.box{padding:14px;display:flex;flex-direction:column;gap:10px}
+.linkrow{display:flex;gap:6px}
+.linkrow input{flex:1;min-width:0;padding:8px;border-radius:8px;border:1px solid var(--line);background:rgba(0,0,0,.3);color:var(--mut);font-size:12px}
+#qr{background:#fff;border-radius:12px;padding:8px;align-self:center}
+#qr img,#qr svg{display:block}
+.plist{display:flex;flex-direction:column;gap:6px}
+.prow{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:10px;background:rgba(255,255,255,.04)}
+.prow img{width:34px;height:34px;object-fit:contain}
+.prow .n{flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--grn);flex:none}.dot.off{background:#555}
+.seg{display:flex;gap:6px}.seg button{flex:1;padding:8px 0;border-radius:10px;background:var(--card);border:1px solid var(--line);font-weight:800}
+.seg button.on{background:var(--yel);color:#2a1300;border-color:var(--yel)}
+.net{font-size:12px;color:var(--mut);display:flex;gap:10px;flex-wrap:wrap}
+.net span:before{content:"●";margin-right:4px;color:#555}.net span.ok:before{color:var(--grn)}.net span.bad:before{color:var(--red)}
+.answers{max-height:260px;overflow:auto;font-size:13px;columns:2;column-gap:10px;color:var(--mut)}
+.answers div{break-inside:avoid;padding:1px 0}
+.stopbox{border:2px solid var(--red);background:rgba(255,59,78,.1)}
+.toggle-clean{position:absolute;right:10px;bottom:10px;z-index:60;opacity:.25}
+.toggle-clean:hover{opacity:1}
+
+/* ---------- PLAYER ---------- */
+#player{min-height:100%;display:flex;flex-direction:column;padding:12px 14px 16px;gap:12px;max-width:560px;margin:0 auto;transition:background .3s}
+body.danger{animation:dangerbg .6s infinite}
+@keyframes dangerbg{50%{background-color:#3a0612}}
+.p-top{display:flex;align-items:center;gap:10px}
+.p-top img{width:44px;height:44px;object-fit:contain;background:rgba(255,255,255,.06);border-radius:50%}
+.p-top .who{flex:1;min-width:0}
+.p-top .who b{display:block;font-size:17px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.p-top .who small{color:var(--mut)}
+.stopbtn{padding:12px 18px;border-radius:14px;font-family:Bungee;font-size:18px;background:transparent;border:3px solid var(--red);color:var(--red)}
+.stopbtn:active{background:var(--red);color:#fff}
+.stopbtn:disabled{opacity:.3}
+.p-cat{padding:14px;text-align:center}
+.p-cat .cat-title{font-size:clamp(20px,6.4vw,30px)}
+.p-main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;min-height:260px}
+.p-bomb{width:min(58vw,260px);position:relative}
+.p-bomb .num{font-size:clamp(34px,11vw,64px)}
+.passbtn{width:100%;padding:26px 10px;border-radius:24px;font-family:Bungee;font-size:clamp(30px,10vw,52px);background:linear-gradient(180deg,#ff5a6a,#d9142f);box-shadow:0 10px 0 #7d0718,0 20px 40px rgba(255,59,78,.4);color:#fff;letter-spacing:.03em}
+.passbtn:active{transform:translateY(6px);box-shadow:0 4px 0 #7d0718}
+.passbtn:disabled{background:#2a2d4a;box-shadow:0 10px 0 #16182c;color:#555a88}
+.holder-mini{display:flex;align-items:center;gap:12px;font-size:20px;font-weight:800}
+.holder-mini img{width:84px;height:84px;object-fit:contain;animation:shake .35s infinite}
+.bar{width:100%;height:12px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--red),var(--org),var(--yel));border-radius:99px}
+.strip{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.strip div{display:flex;flex-direction:column;align-items:center;width:62px;font-size:11px;font-weight:600;gap:2px;opacity:1}
+.strip img{width:46px;height:46px;object-fit:contain;border-radius:50%;background:rgba(255,255,255,.06);border:2px solid transparent}
+.strip .h img{border-color:var(--red);box-shadow:0 0 14px var(--red)}
+.strip .d{filter:grayscale(1);opacity:.4}
+.strip .me span{color:var(--yel)}
+.strip span{max-width:62px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pmsg{font-size:18px;font-weight:800}
+.connbar{position:fixed;top:0;left:0;right:0;padding:6px;text-align:center;font-size:13px;background:#6b0e1d;z-index:99}
+
+@media (max-width:860px){
+  #stage{grid-template-columns:1fr;grid-template-rows:1fr auto;position:static;min-height:100%}
+  #ctrl{width:auto;border-left:0;border-top:1px solid var(--line);max-height:none}
+  #arenaWrap{min-height:92vh}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+const POKE=[[1,"Bulbasaur",1,[11,3],1],[2,"Ivysaur",1,[11,3],1],[3,"Venusaur",1,[11,3],1],[4,"Charmander",1,[9],1],[5,"Charmeleon",1,[9],1],[6,"Charizard",1,[9,2],1],[7,"Squirtle",1,[10],1],[8,"Wartortle",1,[10],1],[9,"Blastoise",1,[10],1],[10,"Caterpie",1,[6],1],[11,"Metapod",1,[6],1],[12,"Butterfree",1,[6,2],1],[13,"Weedle",1,[6,3],1],[14,"Kakuna",1,[6,3],1],[15,"Beedrill",1,[6,3],1],[16,"Pidgey",1,[0,2],1],[17,"Pidgeotto",1,[0,2],1],[18,"Pidgeot",1,[0,2],1],[19,"Rattata",1,[0],0],[20,"Raticate",1,[0],0],[21,"Spearow",1,[0,2],0],[22,"Fearow",1,[0,2],0],[23,"Ekans",1,[3],0],[24,"Arbok",1,[3],0],[25,"Pikachu",1,[12],1],[26,"Raichu",1,[12],1],[27,"Sandshrew",1,[4],0],[28,"Sandslash",1,[4],0],[29,"Nidoran♀",1,[3],1],[30,"Nidorina",1,[3],1],[31,"Nidoqueen",1,[3,4],1],[32,"Nidoran♂",1,[3],1],[33,"Nidorino",1,[3],1],[34,"Nidoking",1,[3,4],1],[35,"Clefairy",1,[17],1],[36,"Clefable",1,[17],1],[37,"Vulpix",1,[9],0],[38,"Ninetales",1,[9],0],[39,"Jigglypuff",1,[0,17],1],[40,"Wigglytuff",1,[0,17],1],[41,"Zubat",1,[3,2],1],[42,"Golbat",1,[3,2],1],[43,"Oddish",1,[11,3],1],[44,"Gloom",1,[11,3],1],[45,"Vileplume",1,[11,3],1],[46,"Paras",1,[6,11],0],[47,"Parasect",1,[6,11],0],[48,"Venonat",1,[6,3],0],[49,"Venomoth",1,[6,3],0],[50,"Diglett",1,[4],0],[51,"Dugtrio",1,[4],0],[52,"Meowth",1,[0],0],[53,"Persian",1,[0],0],[54,"Psyduck",1,[10],0],[55,"Golduck",1,[10],0],[56,"Mankey",1,[1],1],[57,"Primeape",1,[1],1],[58,"Growlithe",1,[9],0],[59,"Arcanine",1,[9],0],[60,"Poliwag",1,[10],1],[61,"Poliwhirl",1,[10],1],[62,"Poliwrath",1,[10,1],1],[63,"Abra",1,[13],1],[64,"Kadabra",1,[13],1],[65,"Alakazam",1,[13],1],[66,"Machop",1,[1],1],[67,"Machoke",1,[1],1],[68,"Machamp",1,[1],1],[69,"Bellsprout",1,[11,3],1],[70,"Weepinbell",1,[11,3],1],[71,"Victreebel",1,[11,3],1],[72,"Tentacool",1,[10,3],0],[73,"Tentacruel",1,[10,3],0],[74,"Geodude",1,[5,4],1],[75,"Graveler",1,[5,4],1],[76,"Golem",1,[5,4],1],[77,"Ponyta",1,[9],0],[78,"Rapidash",1,[9],0],[79,"Slowpoke",1,[10,13],0],[80,"Slowbro",1,[10,13],0],[81,"Magnemite",1,[12,8],1],[82,"Magneton",1,[12,8],1],[83,"Farfetch’d",1,[0,2],0],[84,"Doduo",1,[0,2],0],[85,"Dodrio",1,[0,2],0],[86,"Seel",1,[10],0],[87,"Dewgong",1,[10,14],0],[88,"Grimer",1,[3],0],[89,"Muk",1,[3],0],[90,"Shellder",1,[10],0],[91,"Cloyster",1,[10,14],0],[92,"Gastly",1,[7,3],1],[93,"Haunter",1,[7,3],1],[94,"Gengar",1,[7,3],1],[95,"Onix",1,[5,4],0],[96,"Drowzee",1,[13],0],[97,"Hypno",1,[13],0],[98,"Krabby",1,[10],0],[99,"Kingler",1,[10],0],[100,"Voltorb",1,[12],0],[101,"Electrode",1,[12],0],[102,"Exeggcute",1,[11,13],0],[103,"Exeggutor",1,[11,13],0],[104,"Cubone",1,[4],0],[105,"Marowak",1,[4],0],[106,"Hitmonlee",1,[1],0],[107,"Hitmonchan",1,[1],0],[108,"Lickitung",1,[0],0],[109,"Koffing",1,[3],0],[110,"Weezing",1,[3],0],[111,"Rhyhorn",1,[4,5],1],[112,"Rhydon",1,[4,5],1],[113,"Chansey",1,[0],1],[114,"Tangela",1,[11],0],[115,"Kangaskhan",1,[0],0],[116,"Horsea",1,[10],1],[117,"Seadra",1,[10],1],[118,"Goldeen",1,[10],0],[119,"Seaking",1,[10],0],[120,"Staryu",1,[10],0],[121,"Starmie",1,[10,13],0],[122,"Mr. Mime",1,[13,17],1],[123,"Scyther",1,[6,2],0],[124,"Jynx",1,[14,13],0],[125,"Electabuzz",1,[12],1],[126,"Magmar",1,[9],1],[127,"Pinsir",1,[6],0],[128,"Tauros",1,[0],0],[129,"Magikarp",1,[10],0],[130,"Gyarados",1,[10,2],0],[131,"Lapras",1,[10,14],0],[132,"Ditto",1,[0],0],[133,"Eevee",1,[0],0],[134,"Vaporeon",1,[10],0],[135,"Jolteon",1,[12],0],[136,"Flareon",1,[9],0],[137,"Porygon",1,[0],1],[138,"Omanyte",1,[5,10],0],[139,"Omastar",1,[5,10],0],[140,"Kabuto",1,[5,10],0],[141,"Kabutops",1,[5,10],0],[142,"Aerodactyl",1,[5,2],0],[143,"Snorlax",1,[0],0],[144,"Articuno",1,[14,2],0],[145,"Zapdos",1,[12,2],0],[146,"Moltres",1,[9,2],0],[147,"Dratini",1,[15],1],[148,"Dragonair",1,[15],1],[149,"Dragonite",1,[15,2],1],[150,"Mewtwo",1,[13],0],[151,"Mew",1,[13],0],[152,"Chikorita",2,[11],1],[153,"Bayleef",2,[11],1],[154,"Meganium",2,[11],1],[155,"Cyndaquil",2,[9],1],[156,"Quilava",2,[9],1],[157,"Typhlosion",2,[9],1],[158,"Totodile",2,[10],1],[159,"Croconaw",2,[10],1],[160,"Feraligatr",2,[10],1],[161,"Sentret",2,[0],0],[162,"Furret",2,[0],0],[163,"Hoothoot",2,[0,2],0],[164,"Noctowl",2,[0,2],0],[165,"Ledyba",2,[6,2],0],[166,"Ledian",2,[6,2],0],[167,"Spinarak",2,[6,3],0],[168,"Ariados",2,[6,3],0],[169,"Crobat",2,[3,2],1],[170,"Chinchou",2,[10,12],0],[171,"Lanturn",2,[10,12],0],[172,"Pichu",2,[12],1],[173,"Cleffa",2,[17],1],[174,"Igglybuff",2,[0,17],1],[175,"Togepi",2,[17],1],[176,"Togetic",2,[17,2],1],[177,"Natu",2,[13,2],0],[178,"Xatu",2,[13,2],0],[179,"Mareep",2,[12],1],[180,"Flaaffy",2,[12],1],[181,"Ampharos",2,[12],1],[182,"Bellossom",2,[11],1],[183,"Marill",2,[10,17],1],[184,"Azumarill",2,[10,17],1],[185,"Sudowoodo",2,[5],0],[186,"Politoed",2,[10],1],[187,"Hoppip",2,[11,2],1],[188,"Skiploom",2,[11,2],1],[189,"Jumpluff",2,[11,2],1],[190,"Aipom",2,[0],0],[191,"Sunkern",2,[11],0],[192,"Sunflora",2,[11],0],[193,"Yanma",2,[6,2],0],[194,"Wooper",2,[10,4],0],[195,"Quagsire",2,[10,4],0],[196,"Espeon",2,[13],0],[197,"Umbreon",2,[16],0],[198,"Murkrow",2,[16,2],0],[199,"Slowking",2,[10,13],0],[200,"Misdreavus",2,[7],0],[201,"Unown",2,[13],0],[202,"Wobbuffet",2,[13],0],[203,"Girafarig",2,[0,13],0],[204,"Pineco",2,[6],0],[205,"Forretress",2,[6,8],0],[206,"Dunsparce",2,[0],0],[207,"Gligar",2,[4,2],0],[208,"Steelix",2,[8,4],0],[209,"Snubbull",2,[17],0],[210,"Granbull",2,[17],0],[211,"Qwilfish",2,[10,3],0],[212,"Scizor",2,[6,8],0],[213,"Shuckle",2,[6,5],0],[214,"Heracross",2,[6,1],0],[215,"Sneasel",2,[16,14],0],[216,"Teddiursa",2,[0],1],[217,"Ursaring",2,[0],1],[218,"Slugma",2,[9],0],[219,"Magcargo",2,[9,5],0],[220,"Swinub",2,[14,4],1],[221,"Piloswine",2,[14,4],1],[222,"Corsola",2,[10,5],0],[223,"Remoraid",2,[10],0],[224,"Octillery",2,[10],0],[225,"Delibird",2,[14,2],0],[226,"Mantine",2,[10,2],0],[227,"Skarmory",2,[8,2],0],[228,"Houndour",2,[16,9],0],[229,"Houndoom",2,[16,9],0],[230,"Kingdra",2,[10,15],1],[231,"Phanpy",2,[4],0],[232,"Donphan",2,[4],0],[233,"Porygon2",2,[0],1],[234,"Stantler",2,[0],0],[235,"Smeargle",2,[0],0],[236,"Tyrogue",2,[1],0],[237,"Hitmontop",2,[1],0],[238,"Smoochum",2,[14,13],0],[239,"Elekid",2,[12],1],[240,"Magby",2,[9],1],[241,"Miltank",2,[0],0],[242,"Blissey",2,[0],1],[243,"Raikou",2,[12],0],[244,"Entei",2,[9],0],[245,"Suicune",2,[10],0],[246,"Larvitar",2,[5,4],1],[247,"Pupitar",2,[5,4],1],[248,"Tyranitar",2,[5,16],1],[249,"Lugia",2,[13,2],0],[250,"Ho-Oh",2,[9,2],0],[251,"Celebi",2,[13,11],0],[252,"Treecko",3,[11],1],[253,"Grovyle",3,[11],1],[254,"Sceptile",3,[11],1],[255,"Torchic",3,[9],1],[256,"Combusken",3,[9,1],1],[257,"Blaziken",3,[9,1],1],[258,"Mudkip",3,[10],1],[259,"Marshtomp",3,[10,4],1],[260,"Swampert",3,[10,4],1],[261,"Poochyena",3,[16],0],[262,"Mightyena",3,[16],0],[263,"Zigzagoon",3,[0],1],[264,"Linoone",3,[0],1],[265,"Wurmple",3,[6],1],[266,"Silcoon",3,[6],1],[267,"Beautifly",3,[6,2],1],[268,"Cascoon",3,[6],1],[269,"Dustox",3,[6,3],1],[270,"Lotad",3,[10,11],1],[271,"Lombre",3,[10,11],1],[272,"Ludicolo",3,[10,11],1],[273,"Seedot",3,[11],1],[274,"Nuzleaf",3,[11,16],1],[275,"Shiftry",3,[11,16],1],[276,"Taillow",3,[0,2],0],[277,"Swellow",3,[0,2],0],[278,"Wingull",3,[10,2],0],[279,"Pelipper",3,[10,2],0],[280,"Ralts",3,[13,17],1],[281,"Kirlia",3,[13,17],1],[282,"Gardevoir",3,[13,17],1],[283,"Surskit",3,[6,10],0],[284,"Masquerain",3,[6,2],0],[285,"Shroomish",3,[11],0],[286,"Breloom",3,[11,1],0],[287,"Slakoth",3,[0],1],[288,"Vigoroth",3,[0],1],[289,"Slaking",3,[0],1],[290,"Nincada",3,[6,4],0],[291,"Ninjask",3,[6,2],0],[292,"Shedinja",3,[6,7],0],[293,"Whismur",3,[0],1],[294,"Loudred",3,[0],1],[295,"Exploud",3,[0],1],[296,"Makuhita",3,[1],0],[297,"Hariyama",3,[1],0],[298,"Azurill",3,[0,17],1],[299,"Nosepass",3,[5],0],[300,"Skitty",3,[0],0],[301,"Delcatty",3,[0],0],[302,"Sableye",3,[16,7],0],[303,"Mawile",3,[8,17],0],[304,"Aron",3,[8,5],1],[305,"Lairon",3,[8,5],1],[306,"Aggron",3,[8,5],1],[307,"Meditite",3,[1,13],0],[308,"Medicham",3,[1,13],0],[309,"Electrike",3,[12],0],[310,"Manectric",3,[12],0],[311,"Plusle",3,[12],0],[312,"Minun",3,[12],0],[313,"Volbeat",3,[6],0],[314,"Illumise",3,[6],0],[315,"Roselia",3,[11,3],1],[316,"Gulpin",3,[3],0],[317,"Swalot",3,[3],0],[318,"Carvanha",3,[10,16],0],[319,"Sharpedo",3,[10,16],0],[320,"Wailmer",3,[10],0],[321,"Wailord",3,[10],0],[322,"Numel",3,[9,4],0],[323,"Camerupt",3,[9,4],0],[324,"Torkoal",3,[9],0],[325,"Spoink",3,[13],0],[326,"Grumpig",3,[13],0],[327,"Spinda",3,[0],0],[328,"Trapinch",3,[4],1],[329,"Vibrava",3,[4,15],1],[330,"Flygon",3,[4,15],1],[331,"Cacnea",3,[11],0],[332,"Cacturne",3,[11,16],0],[333,"Swablu",3,[0,2],0],[334,"Altaria",3,[15,2],0],[335,"Zangoose",3,[0],0],[336,"Seviper",3,[3],0],[337,"Lunatone",3,[5,13],0],[338,"Solrock",3,[5,13],0],[339,"Barboach",3,[10,4],0],[340,"Whiscash",3,[10,4],0],[341,"Corphish",3,[10],0],[342,"Crawdaunt",3,[10,16],0],[343,"Baltoy",3,[4,13],0],[344,"Claydol",3,[4,13],0],[345,"Lileep",3,[5,11],0],[346,"Cradily",3,[5,11],0],[347,"Anorith",3,[5,6],0],[348,"Armaldo",3,[5,6],0],[349,"Feebas",3,[10],0],[350,"Milotic",3,[10],0],[351,"Castform",3,[0],0],[352,"Kecleon",3,[0],0],[353,"Shuppet",3,[7],0],[354,"Banette",3,[7],0],[355,"Duskull",3,[7],1],[356,"Dusclops",3,[7],1],[357,"Tropius",3,[11,2],0],[358,"Chimecho",3,[13],0],[359,"Absol",3,[16],0],[360,"Wynaut",3,[13],0],[361,"Snorunt",3,[14],0],[362,"Glalie",3,[14],0],[363,"Spheal",3,[14,10],1],[364,"Sealeo",3,[14,10],1],[365,"Walrein",3,[14,10],1],[366,"Clamperl",3,[10],0],[367,"Huntail",3,[10],0],[368,"Gorebyss",3,[10],0],[369,"Relicanth",3,[10,5],0],[370,"Luvdisc",3,[10],0],[371,"Bagon",3,[15],1],[372,"Shelgon",3,[15],1],[373,"Salamence",3,[15,2],1],[374,"Beldum",3,[8,13],1],[375,"Metang",3,[8,13],1],[376,"Metagross",3,[8,13],1],[377,"Regirock",3,[5],0],[378,"Regice",3,[14],0],[379,"Registeel",3,[8],0],[380,"Latias",3,[15,13],0],[381,"Latios",3,[15,13],0],[382,"Kyogre",3,[10],0],[383,"Groudon",3,[4],0],[384,"Rayquaza",3,[15,2],0],[385,"Jirachi",3,[8,13],0],[386,"Deoxys",3,[13],0],[387,"Turtwig",4,[11],1],[388,"Grotle",4,[11],1],[389,"Torterra",4,[11,4],1],[390,"Chimchar",4,[9],1],[391,"Monferno",4,[9,1],1],[392,"Infernape",4,[9,1],1],[393,"Piplup",4,[10],1],[394,"Prinplup",4,[10],1],[395,"Empoleon",4,[10,8],1],[396,"Starly",4,[0,2],1],[397,"Staravia",4,[0,2],1],[398,"Staraptor",4,[0,2],1],[399,"Bidoof",4,[0],0],[400,"Bibarel",4,[0,10],0],[401,"Kricketot",4,[6],0],[402,"Kricketune",4,[6],0],[403,"Shinx",4,[12],1],[404,"Luxio",4,[12],1],[405,"Luxray",4,[12],1],[406,"Budew",4,[11,3],1],[407,"Roserade",4,[11,3],1],[408,"Cranidos",4,[5],0],[409,"Rampardos",4,[5],0],[410,"Shieldon",4,[5,8],0],[411,"Bastiodon",4,[5,8],0],[412,"Burmy",4,[6],0],[413,"Wormadam",4,[6,11],0],[414,"Mothim",4,[6,2],0],[415,"Combee",4,[6,2],0],[416,"Vespiquen",4,[6,2],0],[417,"Pachirisu",4,[12],0],[418,"Buizel",4,[10],0],[419,"Floatzel",4,[10],0],[420,"Cherubi",4,[11],0],[421,"Cherrim",4,[11],0],[422,"Shellos",4,[10],0],[423,"Gastrodon",4,[10,4],0],[424,"Ambipom",4,[0],0],[425,"Drifloon",4,[7,2],0],[426,"Drifblim",4,[7,2],0],[427,"Buneary",4,[0],0],[428,"Lopunny",4,[0],0],[429,"Mismagius",4,[7],0],[430,"Honchkrow",4,[16,2],0],[431,"Glameow",4,[0],0],[432,"Purugly",4,[0],0],[433,"Chingling",4,[13],0],[434,"Stunky",4,[3,16],0],[435,"Skuntank",4,[3,16],0],[436,"Bronzor",4,[8,13],0],[437,"Bronzong",4,[8,13],0],[438,"Bonsly",4,[5],0],[439,"Mime Jr.",4,[13,17],1],[440,"Happiny",4,[0],1],[441,"Chatot",4,[0,2],0],[442,"Spiritomb",4,[7,16],0],[443,"Gible",4,[15,4],1],[444,"Gabite",4,[15,4],1],[445,"Garchomp",4,[15,4],1],[446,"Munchlax",4,[0],0],[447,"Riolu",4,[1],0],[448,"Lucario",4,[1,8],0],[449,"Hippopotas",4,[4],0],[450,"Hippowdon",4,[4],0],[451,"Skorupi",4,[3,6],0],[452,"Drapion",4,[3,16],0],[453,"Croagunk",4,[3,1],0],[454,"Toxicroak",4,[3,1],0],[455,"Carnivine",4,[11],0],[456,"Finneon",4,[10],0],[457,"Lumineon",4,[10],0],[458,"Mantyke",4,[10,2],0],[459,"Snover",4,[11,14],0],[460,"Abomasnow",4,[11,14],0],[461,"Weavile",4,[16,14],0],[462,"Magnezone",4,[12,8],1],[463,"Lickilicky",4,[0],0],[464,"Rhyperior",4,[4,5],1],[465,"Tangrowth",4,[11],0],[466,"Electivire",4,[12],1],[467,"Magmortar",4,[9],1],[468,"Togekiss",4,[17,2],1],[469,"Yanmega",4,[6,2],0],[470,"Leafeon",4,[11],0],[471,"Glaceon",4,[14],0],[472,"Gliscor",4,[4,2],0],[473,"Mamoswine",4,[14,4],1],[474,"Porygon-Z",4,[0],1],[475,"Gallade",4,[13,1],1],[476,"Probopass",4,[5,8],0],[477,"Dusknoir",4,[7],1],[478,"Froslass",4,[14,7],0],[479,"Rotom",4,[12,7],0],[480,"Uxie",4,[13],0],[481,"Mesprit",4,[13],0],[482,"Azelf",4,[13],0],[483,"Dialga",4,[8,15],0],[484,"Palkia",4,[10,15],0],[485,"Heatran",4,[9,8],0],[486,"Regigigas",4,[0],0],[487,"Giratina",4,[7,15],0],[488,"Cresselia",4,[13],0],[489,"Phione",4,[10],0],[490,"Manaphy",4,[10],0],[491,"Darkrai",4,[16],0],[492,"Shaymin",4,[11],0],[493,"Arceus",4,[0],0],[494,"Victini",5,[13,9],0],[495,"Snivy",5,[11],1],[496,"Servine",5,[11],1],[497,"Serperior",5,[11],1],[498,"Tepig",5,[9],1],[499,"Pignite",5,[9,1],1],[500,"Emboar",5,[9,1],1],[501,"Oshawott",5,[10],1],[502,"Dewott",5,[10],1],[503,"Samurott",5,[10],1],[504,"Patrat",5,[0],0],[505,"Watchog",5,[0],0],[506,"Lillipup",5,[0],1],[507,"Herdier",5,[0],1],[508,"Stoutland",5,[0],1],[509,"Purrloin",5,[16],0],[510,"Liepard",5,[16],0],[511,"Pansage",5,[11],0],[512,"Simisage",5,[11],0],[513,"Pansear",5,[9],0],[514,"Simisear",5,[9],0],[515,"Panpour",5,[10],0],[516,"Simipour",5,[10],0],[517,"Munna",5,[13],0],[518,"Musharna",5,[13],0],[519,"Pidove",5,[0,2],1],[520,"Tranquill",5,[0,2],1],[521,"Unfezant",5,[0,2],1],[522,"Blitzle",5,[12],0],[523,"Zebstrika",5,[12],0],[524,"Roggenrola",5,[5],1],[525,"Boldore",5,[5],1],[526,"Gigalith",5,[5],1],[527,"Woobat",5,[13,2],0],[528,"Swoobat",5,[13,2],0],[529,"Drilbur",5,[4],0],[530,"Excadrill",5,[4,8],0],[531,"Audino",5,[0],0],[532,"Timburr",5,[1],1],[533,"Gurdurr",5,[1],1],[534,"Conkeldurr",5,[1],1],[535,"Tympole",5,[10],1],[536,"Palpitoad",5,[10,4],1],[537,"Seismitoad",5,[10,4],1],[538,"Throh",5,[1],0],[539,"Sawk",5,[1],0],[540,"Sewaddle",5,[6,11],1],[541,"Swadloon",5,[6,11],1],[542,"Leavanny",5,[6,11],1],[543,"Venipede",5,[6,3],1],[544,"Whirlipede",5,[6,3],1],[545,"Scolipede",5,[6,3],1],[546,"Cottonee",5,[11,17],0],[547,"Whimsicott",5,[11,17],0],[548,"Petilil",5,[11],0],[549,"Lilligant",5,[11],0],[550,"Basculin",5,[10],0],[551,"Sandile",5,[4,16],1],[552,"Krokorok",5,[4,16],1],[553,"Krookodile",5,[4,16],1],[554,"Darumaka",5,[9],0],[555,"Darmanitan",5,[9],0],[556,"Maractus",5,[11],0],[557,"Dwebble",5,[6,5],0],[558,"Crustle",5,[6,5],0],[559,"Scraggy",5,[16,1],0],[560,"Scrafty",5,[16,1],0],[561,"Sigilyph",5,[13,2],0],[562,"Yamask",5,[7],0],[563,"Cofagrigus",5,[7],0],[564,"Tirtouga",5,[10,5],0],[565,"Carracosta",5,[10,5],0],[566,"Archen",5,[5,2],0],[567,"Archeops",5,[5,2],0],[568,"Trubbish",5,[3],0],[569,"Garbodor",5,[3],0],[570,"Zorua",5,[16],0],[571,"Zoroark",5,[16],0],[572,"Minccino",5,[0],0],[573,"Cinccino",5,[0],0],[574,"Gothita",5,[13],1],[575,"Gothorita",5,[13],1],[576,"Gothitelle",5,[13],1],[577,"Solosis",5,[13],1],[578,"Duosion",5,[13],1],[579,"Reuniclus",5,[13],1],[580,"Ducklett",5,[10,2],0],[581,"Swanna",5,[10,2],0],[582,"Vanillite",5,[14],1],[583,"Vanillish",5,[14],1],[584,"Vanilluxe",5,[14],1],[585,"Deerling",5,[0,11],0],[586,"Sawsbuck",5,[0,11],0],[587,"Emolga",5,[12,2],0],[588,"Karrablast",5,[6],0],[589,"Escavalier",5,[6,8],0],[590,"Foongus",5,[11,3],0],[591,"Amoonguss",5,[11,3],0],[592,"Frillish",5,[10,7],0],[593,"Jellicent",5,[10,7],0],[594,"Alomomola",5,[10],0],[595,"Joltik",5,[6,12],0],[596,"Galvantula",5,[6,12],0],[597,"Ferroseed",5,[11,8],0],[598,"Ferrothorn",5,[11,8],0],[599,"Klink",5,[8],1],[600,"Klang",5,[8],1],[601,"Klinklang",5,[8],1],[602,"Tynamo",5,[12],1],[603,"Eelektrik",5,[12],1],[604,"Eelektross",5,[12],1],[605,"Elgyem",5,[13],0],[606,"Beheeyem",5,[13],0],[607,"Litwick",5,[7,9],1],[608,"Lampent",5,[7,9],1],[609,"Chandelure",5,[7,9],1],[610,"Axew",5,[15],1],[611,"Fraxure",5,[15],1],[612,"Haxorus",5,[15],1],[613,"Cubchoo",5,[14],0],[614,"Beartic",5,[14],0],[615,"Cryogonal",5,[14],0],[616,"Shelmet",5,[6],0],[617,"Accelgor",5,[6],0],[618,"Stunfisk",5,[4,12],0],[619,"Mienfoo",5,[1],0],[620,"Mienshao",5,[1],0],[621,"Druddigon",5,[15],0],[622,"Golett",5,[4,7],0],[623,"Golurk",5,[4,7],0],[624,"Pawniard",5,[16,8],1],[625,"Bisharp",5,[16,8],1],[626,"Bouffalant",5,[0],0],[627,"Rufflet",5,[0,2],0],[628,"Braviary",5,[0,2],0],[629,"Vullaby",5,[16,2],0],[630,"Mandibuzz",5,[16,2],0],[631,"Heatmor",5,[9],0],[632,"Durant",5,[6,8],0],[633,"Deino",5,[16,15],1],[634,"Zweilous",5,[16,15],1],[635,"Hydreigon",5,[16,15],1],[636,"Larvesta",5,[6,9],0],[637,"Volcarona",5,[6,9],0],[638,"Cobalion",5,[8,1],0],[639,"Terrakion",5,[5,1],0],[640,"Virizion",5,[11,1],0],[641,"Tornadus",5,[2],0],[642,"Thundurus",5,[12,2],0],[643,"Reshiram",5,[15,9],0],[644,"Zekrom",5,[15,12],0],[645,"Landorus",5,[4,2],0],[646,"Kyurem",5,[15,14],0],[647,"Keldeo",5,[10,1],0],[648,"Meloetta",5,[0,13],0],[649,"Genesect",5,[6,8],0],[650,"Chespin",6,[11],1],[651,"Quilladin",6,[11],1],[652,"Chesnaught",6,[11,1],1],[653,"Fennekin",6,[9],1],[654,"Braixen",6,[9],1],[655,"Delphox",6,[9,13],1],[656,"Froakie",6,[10],1],[657,"Frogadier",6,[10],1],[658,"Greninja",6,[10,16],1],[659,"Bunnelby",6,[0],0],[660,"Diggersby",6,[0,4],0],[661,"Fletchling",6,[0,2],1],[662,"Fletchinder",6,[9,2],1],[663,"Talonflame",6,[9,2],1],[664,"Scatterbug",6,[6],1],[665,"Spewpa",6,[6],1],[666,"Vivillon",6,[6,2],1],[667,"Litleo",6,[9,0],0],[668,"Pyroar",6,[9,0],0],[669,"Flabébé",6,[17],1],[670,"Floette",6,[17],1],[671,"Florges",6,[17],1],[672,"Skiddo",6,[11],0],[673,"Gogoat",6,[11],0],[674,"Pancham",6,[1],0],[675,"Pangoro",6,[1,16],0],[676,"Furfrou",6,[0],0],[677,"Espurr",6,[13],0],[678,"Meowstic",6,[13],0],[679,"Honedge",6,[8,7],1],[680,"Doublade",6,[8,7],1],[681,"Aegislash",6,[8,7],1],[682,"Spritzee",6,[17],0],[683,"Aromatisse",6,[17],0],[684,"Swirlix",6,[17],0],[685,"Slurpuff",6,[17],0],[686,"Inkay",6,[16,13],0],[687,"Malamar",6,[16,13],0],[688,"Binacle",6,[5,10],0],[689,"Barbaracle",6,[5,10],0],[690,"Skrelp",6,[3,10],0],[691,"Dragalge",6,[3,15],0],[692,"Clauncher",6,[10],0],[693,"Clawitzer",6,[10],0],[694,"Helioptile",6,[12,0],0],[695,"Heliolisk",6,[12,0],0],[696,"Tyrunt",6,[5,15],0],[697,"Tyrantrum",6,[5,15],0],[698,"Amaura",6,[5,14],0],[699,"Aurorus",6,[5,14],0],[700,"Sylveon",6,[17],0],[701,"Hawlucha",6,[1,2],0],[702,"Dedenne",6,[12,17],0],[703,"Carbink",6,[5,17],0],[704,"Goomy",6,[15],1],[705,"Sliggoo",6,[15],1],[706,"Goodra",6,[15],1],[707,"Klefki",6,[8,17],0],[708,"Phantump",6,[7,11],0],[709,"Trevenant",6,[7,11],0],[710,"Pumpkaboo",6,[7,11],0],[711,"Gourgeist",6,[7,11],0],[712,"Bergmite",6,[14],0],[713,"Avalugg",6,[14],0],[714,"Noibat",6,[2,15],0],[715,"Noivern",6,[2,15],0],[716,"Xerneas",6,[17],0],[717,"Yveltal",6,[16,2],0],[718,"Zygarde",6,[15,4],0],[719,"Diancie",6,[5,17],0],[720,"Hoopa",6,[13,7],0],[721,"Volcanion",6,[9,10],0],[722,"Rowlet",7,[11,2],1],[723,"Dartrix",7,[11,2],1],[724,"Decidueye",7,[11,7],1],[725,"Litten",7,[9],1],[726,"Torracat",7,[9],1],[727,"Incineroar",7,[9,16],1],[728,"Popplio",7,[10],1],[729,"Brionne",7,[10],1],[730,"Primarina",7,[10,17],1],[731,"Pikipek",7,[0,2],1],[732,"Trumbeak",7,[0,2],1],[733,"Toucannon",7,[0,2],1],[734,"Yungoos",7,[0],0],[735,"Gumshoos",7,[0],0],[736,"Grubbin",7,[6],1],[737,"Charjabug",7,[6,12],1],[738,"Vikavolt",7,[6,12],1],[739,"Crabrawler",7,[1],0],[740,"Crabominable",7,[1,14],0],[741,"Oricorio",7,[9,2],0],[742,"Cutiefly",7,[6,17],0],[743,"Ribombee",7,[6,17],0],[744,"Rockruff",7,[5],0],[745,"Lycanroc",7,[5],0],[746,"Wishiwashi",7,[10],0],[747,"Mareanie",7,[3,10],0],[748,"Toxapex",7,[3,10],0],[749,"Mudbray",7,[4],0],[750,"Mudsdale",7,[4],0],[751,"Dewpider",7,[10,6],0],[752,"Araquanid",7,[10,6],0],[753,"Fomantis",7,[11],0],[754,"Lurantis",7,[11],0],[755,"Morelull",7,[11,17],0],[756,"Shiinotic",7,[11,17],0],[757,"Salandit",7,[3,9],0],[758,"Salazzle",7,[3,9],0],[759,"Stufful",7,[0,1],0],[760,"Bewear",7,[0,1],0],[761,"Bounsweet",7,[11],1],[762,"Steenee",7,[11],1],[763,"Tsareena",7,[11],1],[764,"Comfey",7,[17],0],[765,"Oranguru",7,[0,13],0],[766,"Passimian",7,[1],0],[767,"Wimpod",7,[6,10],0],[768,"Golisopod",7,[6,10],0],[769,"Sandygast",7,[7,4],0],[770,"Palossand",7,[7,4],0],[771,"Pyukumuku",7,[10],0],[772,"Código Cero",7,[0],0],[773,"Silvally",7,[0],0],[774,"Minior",7,[5,2],0],[775,"Komala",7,[0],0],[776,"Turtonator",7,[9,15],0],[777,"Togedemaru",7,[12,8],0],[778,"Mimikyu",7,[7,17],0],[779,"Bruxish",7,[10,13],0],[780,"Drampa",7,[0,15],0],[781,"Dhelmise",7,[7,11],0],[782,"Jangmo-o",7,[15],1],[783,"Hakamo-o",7,[15,1],1],[784,"Kommo-o",7,[15,1],1],[785,"Tapu Koko",7,[12,17],0],[786,"Tapu Lele",7,[13,17],0],[787,"Tapu Bulu",7,[11,17],0],[788,"Tapu Fini",7,[10,17],0],[789,"Cosmog",7,[13],1],[790,"Cosmoem",7,[13],1],[791,"Solgaleo",7,[13,8],1],[792,"Lunala",7,[13,7],1],[793,"Nihilego",7,[5,3],0],[794,"Buzzwole",7,[6,1],0],[795,"Pheromosa",7,[6,1],0],[796,"Xurkitree",7,[12],0],[797,"Celesteela",7,[8,2],0],[798,"Kartana",7,[11,8],0],[799,"Guzzlord",7,[16,15],0],[800,"Necrozma",7,[13],0],[801,"Magearna",7,[8,17],0],[802,"Marshadow",7,[1,7],0],[803,"Poipole",7,[3],0],[804,"Naganadel",7,[3,15],0],[805,"Stakataka",7,[5,8],0],[806,"Blacephalon",7,[9,7],0],[807,"Zeraora",7,[12],0],[808,"Meltan",7,[8],0],[809,"Melmetal",7,[8],0],[810,"Grookey",8,[11],1],[811,"Thwackey",8,[11],1],[812,"Rillaboom",8,[11],1],[813,"Scorbunny",8,[9],1],[814,"Raboot",8,[9],1],[815,"Cinderace",8,[9],1],[816,"Sobble",8,[10],1],[817,"Drizzile",8,[10],1],[818,"Inteleon",8,[10],1],[819,"Skwovet",8,[0],0],[820,"Greedent",8,[0],0],[821,"Rookidee",8,[2],1],[822,"Corvisquire",8,[2],1],[823,"Corviknight",8,[2,8],1],[824,"Blipbug",8,[6],1],[825,"Dottler",8,[6,13],1],[826,"Orbeetle",8,[6,13],1],[827,"Nickit",8,[16],0],[828,"Thievul",8,[16],0],[829,"Gossifleur",8,[11],0],[830,"Eldegoss",8,[11],0],[831,"Wooloo",8,[0],0],[832,"Dubwool",8,[0],0],[833,"Chewtle",8,[10],0],[834,"Drednaw",8,[10,5],0],[835,"Yamper",8,[12],0],[836,"Boltund",8,[12],0],[837,"Rolycoly",8,[5],1],[838,"Carkol",8,[5,9],1],[839,"Coalossal",8,[5,9],1],[840,"Applin",8,[11,15],1],[841,"Flapple",8,[11,15],1],[842,"Appletun",8,[11,15],1],[843,"Silicobra",8,[4],0],[844,"Sandaconda",8,[4],0],[845,"Cramorant",8,[2,10],0],[846,"Arrokuda",8,[10],0],[847,"Barraskewda",8,[10],0],[848,"Toxel",8,[12,3],0],[849,"Toxtricity",8,[12,3],0],[850,"Sizzlipede",8,[9,6],0],[851,"Centiskorch",8,[9,6],0],[852,"Clobbopus",8,[1],0],[853,"Grapploct",8,[1],0],[854,"Sinistea",8,[7],0],[855,"Polteageist",8,[7],0],[856,"Hatenna",8,[13],1],[857,"Hattrem",8,[13],1],[858,"Hatterene",8,[13,17],1],[859,"Impidimp",8,[16,17],1],[860,"Morgrem",8,[16,17],1],[861,"Grimmsnarl",8,[16,17],1],[862,"Obstagoon",8,[16,0],1],[863,"Perrserker",8,[8],0],[864,"Cursola",8,[7],0],[865,"Sirfetch’d",8,[1],0],[866,"Mr. Rime",8,[14,13],1],[867,"Runerigus",8,[4,7],0],[868,"Milcery",8,[17],0],[869,"Alcremie",8,[17],0],[870,"Falinks",8,[1],0],[871,"Pincurchin",8,[12],0],[872,"Snom",8,[14,6],0],[873,"Frosmoth",8,[14,6],0],[874,"Stonjourner",8,[5],0],[875,"Eiscue",8,[14],0],[876,"Indeedee",8,[13,0],0],[877,"Morpeko",8,[12,16],0],[878,"Cufant",8,[8],0],[879,"Copperajah",8,[8],0],[880,"Dracozolt",8,[12,15],0],[881,"Arctozolt",8,[12,14],0],[882,"Dracovish",8,[10,15],0],[883,"Arctovish",8,[10,14],0],[884,"Duraludon",8,[8,15],0],[885,"Dreepy",8,[15,7],1],[886,"Drakloak",8,[15,7],1],[887,"Dragapult",8,[15,7],1],[888,"Zacian",8,[17],0],[889,"Zamazenta",8,[1],0],[890,"Eternatus",8,[3,15],0],[891,"Kubfu",8,[1],0],[892,"Urshifu",8,[1,16],0],[893,"Zarude",8,[16,11],0],[894,"Regieleki",8,[12],0],[895,"Regidrago",8,[15],0],[896,"Glastrier",8,[14],0],[897,"Spectrier",8,[7],0],[898,"Calyrex",8,[13,11],0],[899,"Wyrdeer",8,[0,13],0],[900,"Kleavor",8,[6,5],0],[901,"Ursaluna",8,[4,0],1],[902,"Basculegion",8,[10,7],0],[903,"Sneasler",8,[1,3],0],[904,"Overqwil",8,[16,3],0],[905,"Enamorus",8,[17,2],0],[906,"Sprigatito",9,[11],1],[907,"Floragato",9,[11],1],[908,"Meowscarada",9,[11,16],1],[909,"Fuecoco",9,[9],1],[910,"Crocalor",9,[9],1],[911,"Skeledirge",9,[9,7],1],[912,"Quaxly",9,[10],1],[913,"Quaxwell",9,[10],1],[914,"Quaquaval",9,[10,1],1],[915,"Lechonk",9,[0],0],[916,"Oinkologne",9,[0],0],[917,"Tarountula",9,[6],0],[918,"Spidops",9,[6],0],[919,"Nymble",9,[6],0],[920,"Lokix",9,[6,16],0],[921,"Pawmi",9,[12],1],[922,"Pawmo",9,[12,1],1],[923,"Pawmot",9,[12,1],1],[924,"Tandemaus",9,[0],0],[925,"Maushold",9,[0],0],[926,"Fidough",9,[17],0],[927,"Dachsbun",9,[17],0],[928,"Smoliv",9,[11,0],1],[929,"Dolliv",9,[11,0],1],[930,"Arboliva",9,[11,0],1],[931,"Squawkabilly",9,[0,2],0],[932,"Nacli",9,[5],1],[933,"Naclstack",9,[5],1],[934,"Garganacl",9,[5],1],[935,"Charcadet",9,[9],0],[936,"Armarouge",9,[9,13],0],[937,"Ceruledge",9,[9,7],0],[938,"Tadbulb",9,[12],0],[939,"Bellibolt",9,[12],0],[940,"Wattrel",9,[12,2],0],[941,"Kilowattrel",9,[12,2],0],[942,"Maschiff",9,[16],0],[943,"Mabosstiff",9,[16],0],[944,"Shroodle",9,[3,0],0],[945,"Grafaiai",9,[3,0],0],[946,"Bramblin",9,[11,7],0],[947,"Brambleghast",9,[11,7],0],[948,"Toedscool",9,[4,11],0],[949,"Toedscruel",9,[4,11],0],[950,"Klawf",9,[5],0],[951,"Capsakid",9,[11],0],[952,"Scovillain",9,[11,9],0],[953,"Rellor",9,[6],0],[954,"Rabsca",9,[6,13],0],[955,"Flittle",9,[13],0],[956,"Espathra",9,[13],0],[957,"Tinkatink",9,[17,8],1],[958,"Tinkatuff",9,[17,8],1],[959,"Tinkaton",9,[17,8],1],[960,"Wiglett",9,[10],0],[961,"Wugtrio",9,[10],0],[962,"Bombirdier",9,[2,16],0],[963,"Finizen",9,[10],0],[964,"Palafin",9,[10],0],[965,"Varoom",9,[8,3],0],[966,"Revavroom",9,[8,3],0],[967,"Cyclizar",9,[15,0],0],[968,"Orthworm",9,[8],0],[969,"Glimmet",9,[5,3],0],[970,"Glimmora",9,[5,3],0],[971,"Greavard",9,[7],0],[972,"Houndstone",9,[7],0],[973,"Flamigo",9,[2,1],0],[974,"Cetoddle",9,[14],0],[975,"Cetitan",9,[14],0],[976,"Veluza",9,[10,13],0],[977,"Dondozo",9,[10],0],[978,"Tatsugiri",9,[15,10],0],[979,"Annihilape",9,[1,7],1],[980,"Clodsire",9,[3,4],0],[981,"Farigiraf",9,[0,13],0],[982,"Dudunsparce",9,[0],0],[983,"Kingambit",9,[16,8],1],[984,"Colmilargo",9,[4,1],0],[985,"Colagrito",9,[17,13],0],[986,"Furioseta",9,[11,16],0],[987,"Melenaleteo",9,[7,17],0],[988,"Reptalada",9,[6,1],0],[989,"Pelarena",9,[12,4],0],[990,"Ferrodada",9,[4,8],0],[991,"Ferrosaco",9,[14,10],0],[992,"Ferropalmas",9,[1,12],0],[993,"Ferrocuello",9,[16,2],0],[994,"Ferropolilla",9,[9,3],0],[995,"Ferropúas",9,[5,12],0],[996,"Frigibax",9,[15,14],1],[997,"Arctibax",9,[15,14],1],[998,"Baxcalibur",9,[15,14],1],[999,"Gimmighoul",9,[7],0],[1000,"Gholdengo",9,[8,7],0],[1001,"Wo-Chien",9,[16,11],0],[1002,"Chien-Pao",9,[16,14],0],[1003,"Ting-Lu",9,[16,4],0],[1004,"Chi-Yu",9,[16,9],0],[1005,"Bramaluna",9,[15,16],0],[1006,"Ferropaladín",9,[17,1],0],[1007,"Koraidon",9,[1,15],0],[1008,"Miraidon",9,[12,15],0],[1009,"Ondulagua",9,[10,15],0],[1010,"Ferroverdor",9,[11,13],0],[1011,"Dipplin",9,[11,15],1],[1012,"Poltchageist",9,[11,7],0],[1013,"Sinistcha",9,[11,7],0],[1014,"Okidogi",9,[3,1],0],[1015,"Munkidori",9,[3,13],0],[1016,"Fezandipiti",9,[3,17],0],[1017,"Ogerpon",9,[11],0],[1018,"Archaludon",9,[8,15],0],[1019,"Hydrapple",9,[11,15],1],[1020,"Flamariete",9,[9,15],0],[1021,"Electrofuria",9,[12,15],0],[1022,"Ferromole",9,[5,13],0],[1023,"Ferrotesta",9,[8,13],0],[1024,"Terapagos",9,[0],0],[1025,"Pecharunt",9,[3,7],0]];
+const EFF=[[1,1,1,1,1,0.5,1,0,0.5,1,1,1,1,1,1,1,1,1],[2,1,0.5,0.5,1,2,0.5,0,2,1,1,1,1,0.5,2,1,2,0.5],[1,2,1,1,1,0.5,2,1,0.5,1,1,2,0.5,1,1,1,1,1],[1,1,1,0.5,0.5,0.5,1,0.5,0,1,1,2,1,1,1,1,1,2],[1,1,0,2,1,2,0.5,1,2,2,1,0.5,2,1,1,1,1,1],[1,0.5,2,1,0.5,1,2,1,0.5,2,1,1,1,1,2,1,1,1],[1,0.5,0.5,0.5,1,1,1,0.5,0.5,0.5,1,2,1,2,1,1,2,0.5],[0,1,1,1,1,1,1,2,1,1,1,1,1,2,1,1,0.5,1],[1,1,1,1,1,2,1,1,0.5,0.5,0.5,1,0.5,1,2,1,1,2],[1,1,1,1,1,0.5,2,1,2,0.5,0.5,2,1,1,2,0.5,1,1],[1,1,1,1,2,2,1,1,1,2,0.5,0.5,1,1,1,0.5,1,1],[1,1,0.5,0.5,2,2,0.5,1,0.5,0.5,2,0.5,1,1,1,0.5,1,1],[1,1,2,1,0,1,1,1,1,1,2,0.5,0.5,1,1,0.5,1,1],[1,2,1,2,1,1,1,1,0.5,1,1,1,1,0.5,1,1,0,1],[1,1,2,1,2,1,1,1,0.5,0.5,0.5,2,1,1,0.5,2,1,1],[1,1,1,1,1,1,1,1,0.5,1,1,1,1,1,1,2,1,0],[1,0.5,1,1,1,1,1,2,1,1,1,1,1,2,1,1,0.5,0.5],[1,2,1,0.5,1,1,1,1,0.5,0.5,1,1,1,1,1,2,2,1]];
+
+</script>
+<script>
+"use strict";
+/* =========================================================
+   POKÉBOMBA — pasar la bomba con categorías Pokémon
+   ========================================================= */
+const $=(s,r=document)=>r.querySelector(s);
+const Q=new URLSearchParams(location.search);
+const ROOM=(Q.get('sala')||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);
+const ROLE=ROOM?(Q.get('rol')||'player'):'home';
+const LOCAL=Q.has('local');
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const rnd=n=>Math.floor(Math.random()*n);
+const pick=a=>a[rnd(a.length)];
+const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const SPR=id=>`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+const baseURL=()=>location.origin+location.pathname;
+
+/* ---------------- Datos / categorías ---------------- */
+const TYPES=['Normal','Lucha','Volador','Veneno','Tierra','Roca','Bicho','Fantasma','Acero','Fuego','Agua','Planta','Eléctrico','Psíquico','Hielo','Dragón','Siniestro','Hada'];
+const TCOL=['#9fa19f','#e0712c','#81b9ef','#9141cb','#915121','#afa981','#91a119','#704170','#60a1b8','#e62829','#2980ef','#3fa129','#fac000','#ef4179','#3dcef3','#5060e1','#624d4e','#ef70ef'];
+const REG=['','Kanto','Johto','Hoenn','Sinnoh','Teselia','Kalos','Alola','Galar','Paldea'];
+const RCOL=['','#e84b3c','#c9a227','#2e9e5b','#6c63d9','#3b3b3b','#1f7fbf','#f08a24','#8e3b9e','#c2185b'];
+const norm=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toUpperCase();
+const LETTER=POKE.map(p=>norm(p[1]).replace(/[^A-Z]/g,'')[0]||'?');
+const mult=(atk,ts)=>ts.reduce((m,t)=>m*EFF[atk][t],1);
+const PRED={
+  type:v=>p=>p[3].includes(v),
+  gen:v=>p=>p[2]===v,
+  letter:v=>p=>LETTER[p[0]-1]===v,
+  weak:v=>p=>mult(v,p[3])>1,
+  line3:()=>p=>p[4]===1,
+};
+const ORDER=['weak','type','gen','line3','letter'];
+const TEMPLATES=[
+  [['type'],3],[['letter'],3],[['gen'],2],[['weak'],2],
+  [['type','gen'],5],[['weak','gen'],5],[['letter','gen'],2],[['letter','type'],2],
+  [['line3','gen'],2],[['line3','type'],3],[['line3','letter'],1],[['weak','line3'],2],[['line3'],1],
+];
+const MIN_ANSWERS=20;
+function randVal(k){
+  if(k==='type'||k==='weak')return rnd(18);
+  if(k==='gen')return 1+rnd(9);
+  if(k==='letter')return pick(LETTER);          // ponderado por cantidad
+  return 1;
+}
+function catMatches(parts){const fs=parts.map(([k,v])=>PRED[k](v));return POKE.filter(p=>fs.every(f=>f(p)))}
+const catKey=parts=>parts.map(p=>p.join(':')).sort().join('|');
+function genCategory(used=[]){
+  const tot=TEMPLATES.reduce((a,t)=>a+t[1],0);
+  for(let tries=0;tries<500;tries++){
+    let r=Math.random()*tot,tpl=TEMPLATES[0][0];
+    for(const [t,w] of TEMPLATES){if((r-=w)<0){tpl=t;break}}
+    for(let j=0;j<60;j++){
+      const parts=tpl.map(k=>[k,randVal(k)]);
+      const key=catKey(parts);
+      if(used.includes(key))continue;
+      const n=catMatches(parts).length;
+      if(n>=MIN_ANSWERS)return {parts,n,key};
+    }
+  }
+  return {parts:[['type',10]],n:catMatches([['type',10]]).length,key:'type:10'};
+}
+function catHTML(c){
+  if(!c)return {title:'',chips:''};
+  const ps=[...c.parts].sort((a,b)=>ORDER.indexOf(a[0])-ORDER.indexOf(b[0]));
+  const seg=[],chips=[];
+  for(const [k,v] of ps){
+    if(k==='type'){seg.push(`de tipo <span class="hl" style="color:${TCOL[v]}">${TYPES[v]}</span>`);chips.push(`<span class="chip" style="background:${TCOL[v]}">Tipo ${TYPES[v]}</span>`)}
+    if(k==='weak'){seg.push(`débiles a <span class="hl" style="color:${TCOL[v]}">${TYPES[v]}</span>`);chips.push(`<span class="chip" style="background:${TCOL[v]}">Débil a ${TYPES[v]}</span>`)}
+    if(k==='gen'){seg.push(`de <span class="hl">${REG[v]}</span>`);chips.push(`<span class="chip" style="background:${RCOL[v]}">${REG[v]} · Gen ${v}</span>`)}
+    if(k==='line3'){seg.push(`con <span class="hl">línea evolutiva de 3</span>`);chips.push(`<span class="chip" style="background:#6b4bd8">Línea de 3 etapas</span>`)}
+    if(k==='letter'){seg.push(`que empiezan con <span class="hl">«${v}»</span>`);chips.push(`<span class="chip" style="background:#2b2f5a">Letra ${v}</span>`)}
+  }
+  return {title:'Pokémon '+seg.join(' '),chips:chips.join('')};
+}
+
+/* ---------------- Sonido ---------------- */
+let AC=null;
+function audio(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC}
+function beep(f=880,d=.07,type='square',vol=.08){const a=audio();if(!a)return;const o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.value=f;g.gain.setValueAtTime(vol,a.currentTime);g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+d);o.connect(g).connect(a.destination);o.start();o.stop(a.currentTime+d)}
+function boomSound(){const a=audio();if(!a)return;const len=a.sampleRate*1.4,b=a.createBuffer(1,len,a.sampleRate),d=b.getChannelData(0);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.5);const s=a.createBufferSource();s.buffer=b;const f=a.createBiquadFilter();f.type='lowpass';f.frequency.setValueAtTime(1800,a.currentTime);f.frequency.exponentialRampToValueAtTime(80,a.currentTime+1.2);const g=a.createGain();g.gain.value=.9;s.connect(f).connect(g).connect(a.destination);s.start();beep(60,.6,'sine',.5)}
+function passSound(){beep(520,.05,'triangle',.12);setTimeout(()=>beep(880,.07,'triangle',.12),50)}
+function stopSound(){beep(300,.15,'sawtooth',.1);setTimeout(()=>beep(200,.25,'sawtooth',.1),150)}
+function winSound(){[523,659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,.18,'triangle',.12),i*140))}
+
+/* ---------------- Red ---------------- */
+const PEER_PREFIX='pkbomba-v1-';
+const BROKER='wss://broker.emqx.io:8084/mqtt';
+const TOPIC=r=>'pkbomba/v1/'+r;
+const LIBS={peer:'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js',mqtt:'https://cdn.jsdelivr.net/npm/mqtt@5.10.1/dist/mqtt.min.js',qr:'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js'};
+const loaded={};
+function loadScript(k){return loaded[k]||(loaded[k]=new Promise((res,rej)=>{const s=document.createElement('script');s.src=LIBS[k];s.onload=res;s.onerror=()=>{delete loaded[k];rej(new Error('No cargó '+k))};document.head.appendChild(s)}))}
+
+class HostNet{
+  constructor(room,onMsg,onStatus){this.room=room;this.onMsg=onMsg;this.onStatus=onStatus;this.conns=new Set();this.mqttSeen=0;this.st={p2p:'…',mqtt:'…'};
+    try{this.bc=new BroadcastChannel('pkbomba-'+room);this.bc.onmessage=e=>{if(e.data&&e.data.up)this.onMsg(e.data.m)}}catch(e){}}
+  status(k,v){this.st[k]=v;this.onStatus&&this.onStatus(this.st)}
+  async start(){if(LOCAL){this.status('p2p','local');this.status('mqtt','local');return}this.startPeer();this.startMqtt()}
+  async startPeer(){
+    try{await loadScript('peer')}catch(e){this.status('p2p','bad');setTimeout(()=>this.startPeer(),4000);return}
+    const peer=new Peer(PEER_PREFIX+this.room,{debug:0});this.peer=peer;
+    peer.on('open',()=>this.status('p2p','ok'));
+    peer.on('connection',c=>{c.on('open',()=>this.conns.add(c));c.on('data',m=>this.onMsg(m));c.on('close',()=>this.conns.delete(c));c.on('error',()=>this.conns.delete(c))});
+    peer.on('disconnected',()=>{this.status('p2p','bad');setTimeout(()=>{try{peer.reconnect()}catch(e){}},1500)});
+    peer.on('error',e=>{this.status('p2p','bad');if(['unavailable-id','network','server-error','socket-error','socket-closed'].includes(e.type)){try{peer.destroy()}catch(_){}setTimeout(()=>this.startPeer(),3000)}});
+  }
+  async startMqtt(){
+    try{await loadScript('mqtt')}catch(e){this.status('mqtt','bad');setTimeout(()=>this.startMqtt(),4000);return}
+    const c=mqtt.connect(BROKER,{clientId:'pkbh_'+Math.random().toString(36).slice(2,10),reconnectPeriod:2000,connectTimeout:8000,clean:true});this.mq=c;
+    c.on('connect',()=>{this.status('mqtt','ok');c.subscribe(TOPIC(this.room)+'/up')});
+    c.on('close',()=>this.status('mqtt','bad'));
+    c.on('message',(t,p)=>{try{this.mqttSeen=Date.now();this.onMsg(JSON.parse(p.toString()))}catch(e){}});
+  }
+  send(m){
+    for(const c of this.conns){try{c.open&&c.send(m)}catch(e){}}
+    if(this.mq&&this.mq.connected&&Date.now()-this.mqttSeen<20000)this.mq.publish(TOPIC(this.room)+'/down',JSON.stringify(m));
+    if(this.bc)this.bc.postMessage({down:1,m});
+  }
+}
+
+class ClientNet{
+  constructor(room,onMsg,onStatus){this.room=room;this.onMsg=onMsg;this.onStatus=onStatus;this.mode='';this.lastRx=0}
+  rx(m){this.lastRx=Date.now();this.onMsg(m)}
+  status(s){this.mode=s;this.onStatus&&this.onStatus(s)}
+  start(){
+    if(LOCAL){this.bc=new BroadcastChannel('pkbomba-'+this.room);this.bc.onmessage=e=>{if(e.data&&e.data.down)this.rx(e.data.m)};this.status('local');return}
+    this.tryPeer();
+  }
+  async tryPeer(){
+    this.status('conectando');
+    let done=false;const fail=()=>{if(done)return;done=true;this.startMqtt()};
+    const to=setTimeout(fail,7000);
+    try{await loadScript('peer')}catch(e){clearTimeout(to);fail();return}
+    try{
+      const peer=new Peer({debug:0});this.peer=peer;
+      peer.on('error',()=>{clearTimeout(to);fail()});
+      peer.on('open',()=>{
+        const c=peer.connect(PEER_PREFIX+this.room,{reliable:true});
+        c.on('open',()=>{if(done){try{c.close()}catch(e){}return}done=true;clearTimeout(to);this.conn=c;this.status('p2p');this.flush()});
+        c.on('data',m=>this.rx(m));
+        c.on('close',()=>{if(this.conn===c){this.conn=null;this.startMqtt()}});
+        c.on('error',()=>{});
+      });
+    }catch(e){clearTimeout(to);fail()}
+  }
+  async startMqtt(){
+    if(this.mq){this.status(this.mq.connected?'mqtt':'conectando');return}
+    try{await loadScript('mqtt')}catch(e){this.status('sin conexión');setTimeout(()=>this.startMqtt(),3000);return}
+    const c=mqtt.connect(BROKER,{clientId:'pkbc_'+Math.random().toString(36).slice(2,10),reconnectPeriod:2000,connectTimeout:8000});this.mq=c;
+    c.on('connect',()=>{c.subscribe(TOPIC(this.room)+'/down');if(!this.conn)this.status('mqtt');this.flush()});
+    c.on('close',()=>{if(!this.conn)this.status('conectando')});
+    c.on('message',(t,p)=>{try{this.rx(JSON.parse(p.toString()))}catch(e){}});
+  }
+  flush(){if(this.pending){const p=this.pending;this.pending=null;this.send(p)}}
+  send(m){
+    if(this.bc){this.bc.postMessage({up:1,m});return}
+    if(this.conn&&this.conn.open){try{this.conn.send(m);return}catch(e){}}
+    if(this.mq&&this.mq.connected){this.mq.publish(TOPIC(this.room)+'/up',JSON.stringify(m));return}
+    this.pending=m;
+  }
+}
+
+/* ---------------- Bomba SVG ---------------- */
+function bombSVG(){return `<svg viewBox="0 0 120 120">
+  <defs><radialGradient id="bg1" cx="38%" cy="35%" r="70%"><stop offset="0" stop-color="#5a5f86"/><stop offset=".45" stop-color="#23264a"/><stop offset="1" stop-color="#0a0b18"/></radialGradient>
+  <linearGradient id="bg2" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#9aa0c8"/><stop offset="1" stop-color="#4b507a"/></linearGradient></defs>
+  <circle class="tring-bg" cx="60" cy="68" r="56" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="5"/>
+  <circle class="tring" cx="60" cy="68" r="56" fill="none" stroke="#ff3b4e" stroke-width="5" stroke-linecap="round" transform="rotate(-90 60 68)" stroke-dasharray="351.9" stroke-dashoffset="0"/>
+  <g class="body"><circle cx="60" cy="70" r="40" fill="url(#bg1)" stroke="#000" stroke-width="3"/>
+  <ellipse cx="46" cy="54" rx="12" ry="7" fill="#fff" opacity=".25" transform="rotate(-30 46 54)"/>
+  <rect x="49" y="24" width="22" height="12" rx="3" fill="url(#bg2)" stroke="#000" stroke-width="3"/></g>
+  <path d="M60 24 C60 12 72 10 78 6" fill="none" stroke="#c9a46a" stroke-width="4" stroke-linecap="round"/>
+  <g class="spark" style="transform-origin:78px 6px"><circle cx="78" cy="6" r="6" fill="#ffd23f"/><circle cx="78" cy="6" r="3" fill="#fff"/>
+  <path d="M78 -6v6M78 12v6M66 6h6M84 6h6M70 -2l4 4M86 14l-4-4M86 -2l-4 4M70 14l4-4" stroke="#ff9f1c" stroke-width="2.5" stroke-linecap="round"/></g>
+</svg><div class="num"></div>`}
+function setBombTime(el,ms,total){
+  if(!el)return;const s=Math.max(0,ms);const r=el.querySelector('.tring');
+  if(r){r.setAttribute('stroke-dashoffset',String(351.9*(1-s/total)));r.setAttribute('stroke',s<3000?'#ff3b4e':s<6000?'#ff9f1c':'#ffd23f')}
+  const n=el.querySelector('.num');if(n){const t=Math.ceil(s/1000);if(n.textContent!==String(t))n.textContent=t}
+  el.classList.toggle('hot',s<3000);
+}
+function boomFX(parent,x,y){
+  const b=document.createElement('div');b.className='boomfx';b.style.left=x;b.style.top=y;
+  let h='<div class="ring2"></div>';for(let i=0;i<26;i++){const a=Math.random()*6.28,d=80+Math.random()*220;h+=`<i style="--dx:${Math.cos(a)*d}px;--dy:${Math.sin(a)*d}px;background:${pick(['#ffd23f','#ff9f1c','#ff3b4e','#fff'])}"></i>`}
+  b.innerHTML=h;parent.appendChild(b);setTimeout(()=>b.remove(),1200);
+  const f=document.createElement('div');f.className='flash';document.body.appendChild(f);setTimeout(()=>f.remove(),700);
+  document.body.classList.remove('shakeit');void document.body.offsetWidth;document.body.classList.add('shakeit');
+}
+function confetti(){for(let i=0;i<120;i++){const c=document.createElement('div');c.className='confetti';c.style.left=Math.random()*100+'vw';c.style.background=pick(['#ffd23f','#ff3b4e','#2ee59d','#4d7cff','#ef70ef']);c.style.animationDuration=(2.5+Math.random()*2.5)+'s';c.style.animationDelay=Math.random()*1.5+'s';document.body.appendChild(c);setTimeout(()=>c.remove(),7000)}}
+
+/* =========================================================
+   HOME
+   ========================================================= */
+function newCode(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ';let s='';for(let i=0;i<4;i++)s+=A[rnd(A.length)];return s}
+function renderHome(){
+  document.title='PokéBomba';
+  $('#app').innerHTML=`<div class="screen">
+    <div class="logo home-logo">POKÉ<br>BOMBA</div>
+    <div class="tag">Decí un Pokémon de la categoría y pasá la bomba antes de que explote. Cada ronda cae uno. De 2 a 6 jugadores.</div>
+    <div class="card panel">
+      <button class="btn pri" id="create">💣 Crear sala</button>
+      <div class="mut" style="font-size:13px;text-align:center">Abre el panel de espectador/anfitrión (ideal para OBS o pantalla compartida)</div>
+      <div class="or">o unite a una sala</div>
+      <div class="field"><input id="code" class="code-in" maxlength="6" placeholder="CÓDIGO" autocomplete="off"></div>
+      <button class="btn" id="join">Entrar como jugador</button>
+    </div></div>`;
+  const q=LOCAL?'&local=1':'';
+  $('#create').onclick=()=>{location.href=`${baseURL()}?sala=${newCode()}&rol=host${q}`};
+  const go=()=>{const c=$('#code').value.trim().toUpperCase();if(c.length>=4)location.href=`${baseURL()}?sala=${c}${q}`};
+  $('#join').onclick=go;$('#code').onkeydown=e=>{if(e.key==='Enter')go()};
+}
+
+/* =========================================================
+   HOST (autoridad del juego) + ESPECTADOR
+   ========================================================= */
+const HKEY='pkbomba-host-'+ROOM;
+let S=null,net=null,clockOff=0,lastV=-1,lastEpoch=null,myId=null;
+const T_REVEAL=3400,T_COUNT=3000,T_BOOM=5200;
+
+function hostInit(){
+  S=store.get(HKEY);
+  if(!S||S.room!==ROOM)S={room:ROOM,v:0,phase:'lobby',players:[],kicked:[],holder:null,lastPasser:null,stopBy:null,cat:null,fuse:10000,deadline:0,remaining:0,phaseEnd:0,round:0,turn:0,elim:null,elimWhy:'',winner:null,used:[]};
+  S.epoch=Math.random().toString(36).slice(2,8);
+  if(S.phase==='playing'){S.phase='stop';S.remaining=S.fuse;S.stopBy=null}   // si se recargó en medio de la ronda, pausa
+  const seen={};S.players.forEach(p=>{p.on=false;seen[p.id]=0});
+  const H={seen};
+  net=new HostNet(ROOM,m=>hostMsg(m,H),st=>renderNet(st));
+  net.start();
+  setInterval(()=>hostTick(H),80);
+  setInterval(()=>push(false),1500);
+  stageInit(true);
+  push();
+}
+function push(bump=true){if(bump)S.v++;S.now=Date.now();store.set(HKEY,S);net.send({t:'state',s:S});onState(S,true)}
+function alive(){return S.players.filter(p=>p.alive)}
+function nextAlive(id){const a=S.players;const i=a.findIndex(p=>p.id===id);for(let k=1;k<=a.length;k++){const p=a[(i+k)%a.length];if(p.alive)return p.id}return id}
+function hostMsg(m,H){
+  if(!m||typeof m!=='object')return;
+  const now=Date.now();
+  if(m.t==='join'){
+    if(m.role==='viewer')return;
+    const id=String(m.id||'').slice(0,40);if(!id)return;H.seen[id]=now;
+    let p=S.players.find(x=>x.id===id);
+    if(p){let ch=!p.on;p.on=true;if(S.phase==='lobby'){const nm=String(m.name||'').slice(0,16)||p.name,av=+m.av||p.av;if(nm!==p.name||av!==p.av){p.name=nm;p.av=av;ch=true}}if(ch)push();return}
+    if(S.kicked.includes(id)||S.phase!=='lobby'||S.players.length>=6)return;
+    S.players.push({id,name:String(m.name||'Jugador').slice(0,16),av:+m.av||25,alive:true,on:true});push();return;
+  }
+  if(m.t==='pass'){if(S.phase==='playing'&&S.holder===m.id&&m.turn===S.turn)doPass();return}
+  if(m.t==='stop'){if(S.phase==='playing'&&m.turn===S.turn&&S.players.some(p=>p.id===m.id))doStop(m.id);return}
+}
+function doPass(){S.lastPasser=S.holder;S.holder=nextAlive(S.holder);S.turn++;S.passes=(S.passes||0)+1;S.deadline=Date.now()+S.fuse;push()}
+function doStop(by){S.phase='stop';S.remaining=Math.max(500,S.deadline-Date.now());S.stopBy=by;push()}
+function hostTick(H){
+  const now=Date.now();let ch=false;
+  for(const p of S.players){const on=now-(H.seen[p.id]||0)<7000;if(p.on!==on){p.on=on;ch=true}}
+  if(S.phase==='lobby'){const before=S.players.length;S.players=S.players.filter(p=>p.on||now-(H.seen[p.id]||0)<30000||H.seen[p.id]===0&&false);if(S.players.length!==before)ch=true}
+  if(S.phase==='reveal'&&now>=S.phaseEnd){S.phase='countdown';S.phaseEnd=now+T_COUNT;ch=true}
+  else if(S.phase==='countdown'&&now>=S.phaseEnd){S.phase='playing';S.deadline=now+S.fuse;S.turn++;ch=true}
+  else if(S.phase==='playing'&&now>=S.deadline){eliminate(S.holder,'boom');return}
+  else if(S.phase==='boom'&&now>=S.phaseEnd){if(alive().length<=1){S.phase='winner';S.winner=(alive()[0]||{}).id;ch=true}else{startRound();return}}
+  if(ch)push();
+}
+function eliminate(id,why){const p=S.players.find(x=>x.id===id);if(p)p.alive=false;S.elim=id;S.elimWhy=why;S.phase='boom';S.phaseEnd=Date.now()+T_BOOM;S.stopBy=why==='boom'?null:S.stopBy;push()}
+function startRound(keepHolder){
+  S.round++;const c=genCategory(S.used);S.used.push(c.key);S.cat=c;
+  const a=alive();if(!keepHolder||!a.some(p=>p.id===S.holder))S.holder=pick(a).id;
+  S.lastPasser=null;S.stopBy=null;S.elim=null;S.passes=0;S.phase='reveal';S.phaseEnd=Date.now()+T_REVEAL;push();
+}
+const hostAct={
+  start(){if(S.players.length<2)return;S.players.forEach(p=>p.alive=true);S.round=0;S.used=[];S.winner=null;startRound()},
+  lobby(){S.phase='lobby';S.players.forEach(p=>p.alive=true);S.round=0;S.cat=null;S.winner=null;S.elim=null;push()},
+  fuse(ms){S.fuse=ms;push()},
+  kick(id){S.players=S.players.filter(p=>p.id!==id);S.kicked.push(id);push()},
+  resolve(k){
+    if(S.phase!=='stop')return;
+    if(k==='go'){S.phase='playing';S.deadline=Date.now()+S.remaining;S.turn++;S.stopBy=null;push();return}
+    const id=k==='last'?S.lastPasser:k==='holder'?S.holder:S.stopBy;
+    if(id)eliminate(id,k==='stopper'?'falso':'stop');
+  },
+  hostStop(){if(S.phase==='playing')doStop('__host')},
+  reroll(){if(['reveal','countdown','playing','stop'].includes(S.phase)){S.round--;startRound(true)}},
+};
+
+/* ---------------- Render escenario ---------------- */
+let prevS=null;
+function stageInit(isHost){
+  document.title='PokéBomba · Sala '+ROOM;
+  $('#app').innerHTML=`<div id="stage" class="${isHost?'':'clean'}">
+    <div id="arenaWrap">
+      <div class="topbar"><div class="logo stage-logo">POKÉBOMBA</div><div class="round-badge" id="roundB">SALA ${ROOM}</div><div class="room-chip">Sala <b>${ROOM}</b></div></div>
+      <div class="card catbox" id="catbox"><div class="cat-kicker" id="catK">Esperando jugadores</div><div class="cat-title" id="catT">Uníte con el código <span class="hl">${ROOM}</span></div><div class="chips" id="catC"></div><div class="cat-count" id="catN"></div></div>
+      <div class="arena"><div class="ring" id="ring"><div class="bomb hidden" id="bomb">${bombSVG()}</div></div></div>
+      <div class="overlay hidden" id="ov"></div>
+    </div>
+    ${isHost?`<div id="ctrl"></div>`:''}
+  </div>${isHost?`<button class="btn sm toggle-clean" id="tclean" title="Ocultar/mostrar controles">👁</button>`:''}`;
+  if(isHost){$('#tclean').onclick=()=>$('#stage').classList.toggle('clean')}
+  requestAnimationFrame(stageLoop);
+  window.addEventListener('resize',()=>layoutRing(true));
+}
+function ringPos(i,n){const a=-Math.PI/2+i*2*Math.PI/n;return [50+38*Math.cos(a),50+38*Math.sin(a),a]}
+let ringSig='';
+function layoutRing(force){
+  const ring=$('#ring');if(!ring||!S)return;
+  const n=S.players.length;const sig=S.players.map(p=>p.id+p.av+p.name).join()+n;
+  if(sig!==ringSig||force){ringSig=sig;ring.querySelectorAll('.pl').forEach(e=>e.remove());
+    S.players.forEach((p,i)=>{const [x,y]=ringPos(i,n);const d=document.createElement('div');d.className='pl';d.dataset.id=p.id;d.style.left=x+'%';d.style.top=y+'%';
+      d.innerHTML=`<div class="ava"><img src="${SPR(p.av)}" alt=""></div><div class="nm">${esc(p.name)}</div><div class="off-tag hidden">desconectado</div>`;ring.appendChild(d)})}
+  const nx=S.holder&&['playing','stop','countdown','reveal'].includes(S.phase)?nextAliveC(S.holder):null;
+  S.players.forEach(p=>{const d=ring.querySelector(`.pl[data-id="${CSS.escape(p.id)}"]`);if(!d)return;
+    d.classList.toggle('dead',!p.alive);d.classList.toggle('off',!p.on);d.querySelector('.off-tag').classList.toggle('hidden',p.on);
+    d.classList.toggle('hold',p.id===S.holder&&['playing','countdown','reveal','stop'].includes(S.phase)&&p.alive);d.classList.toggle('next',p.id===nx&&S.phase==='playing')});
+  const bomb=$('#bomb');const hi=S.players.findIndex(p=>p.id===S.holder);
+  const showB=hi>=0&&['reveal','countdown','playing','stop'].includes(S.phase);bomb.classList.toggle('hidden',!showB);
+  if(showB){const [,,a]=ringPos(hi,n);bomb.style.left=(50+14*Math.cos(a))+"%";bomb.style.top=(50+14*Math.sin(a))+"%"}
+}
+function nextAliveC(id){const a=S.players;const i=a.findIndex(p=>p.id===id);for(let k=1;k<=a.length;k++){const p=a[(i+k)%a.length];if(p.alive)return p.id}return null}
+const pname=id=>id==='__host'?'El anfitrión':esc((S.players.find(p=>p.id===id)||{name:'?'}).name);
+const pav=id=>(S.players.find(p=>p.id===id)||{av:25}).av;
+let spinTimer=null,ovKey='',lastTickSec=-1;
+function renderCat(){
+  const box=$('#catbox');if(!box)return;
+  if(S.phase==='lobby'){box.classList.remove('spin');$('#catK').textContent=`Jugadores ${S.players.length}/6`;$('#catT').innerHTML=`Uníte con el código <span class="hl">${ROOM}</span>`;$('#catC').innerHTML='';$('#catN').textContent='';$('#roundB').textContent='LOBBY';return}
+  $('#roundB').textContent='RONDA '+S.round;
+  if(S.phase==='reveal'&&S.now&&Date.now()<S.phaseEnd+clockOff-900){
+    if(!spinTimer){box.classList.add('spin');$('#catK').textContent='Sorteando categoría…';spinTimer=setInterval(()=>{const h=catHTML(genCategory());$('#catT').innerHTML=h.title;$('#catC').innerHTML=h.chips;$('#catN').textContent='';if(ROLE==='host')beep(1200+rnd(400),.02,'square',.03)},90)}
+    return;
+  }
+  if(spinTimer){clearInterval(spinTimer);spinTimer=null;box.classList.remove('spin');box.classList.remove('land');void box.offsetWidth;box.classList.add('land');beep(660,.12,'triangle',.12)}
+  const h=catHTML(S.cat);$('#catK').textContent='Categoría';$('#catT').innerHTML=h.title;$('#catC').innerHTML=h.chips;$('#catN').textContent=S.cat?`${S.cat.n} respuestas posibles`:'';
+}
+function renderOverlay(){
+  const ov=$('#ov');if(!ov)return;let key=S.phase,h='';
+  if(S.phase==='countdown'){const left=Math.ceil((S.phaseEnd+clockOff-Date.now())/1000);key+=left;if(left>0)h=`<div class="big cd" style="color:var(--yel)">${left}</div><div class="sub">La bomba empieza en <span style="color:var(--red)">${pname(S.holder)}</span></div>`}
+  else if(S.phase==='stop'){key+=S.stopBy+S.lastPasser;h=`<div class="big stop-title">¡STOP!</div><div class="sub">${pname(S.stopBy||'__host')} ${S.lastPasser?`desconfía de <span style="color:var(--yel)">${pname(S.lastPasser)}</span>`:'frenó el juego'}</div><div class="mut">Juego en pausa · el anfitrión decide</div>`}
+  else if(S.phase==='boom'){key+=S.elim;h=`<div class="winner-av" style="border-color:var(--red);box-shadow:0 0 80px #ff3b4e88;filter:grayscale(.6)"><img src="${SPR(pav(S.elim))}"></div><div class="big boom-title">${S.elimWhy==='boom'?'¡BOOM!':'¡AFUERA!'}</div><div class="sub">${pname(S.elim)} queda eliminado${S.elimWhy==='stop'?' (respuesta inválida)':S.elimWhy==='falso'?' (STOP falso)':''}</div><div class="mut">Quedan ${alive().length}</div>`}
+  else if(S.phase==='winner'){key+=S.winner;h=`<div class="winner-av"><img src="${SPR(pav(S.winner))}"></div><div class="big logo">¡${pname(S.winner)}<br>GANA!</div><div class="sub">👑 Última persona en pie</div>`}
+  if(key===ovKey)return;const prev=ovKey;ovKey=key;
+  ov.classList.toggle('hidden',!h);ov.classList.toggle('dim',!!h&&S.phase!=='countdown');ov.innerHTML=h;
+  if(S.phase==='countdown'&&h)beep(440,.12,'triangle',.12);
+  if(S.phase==='stop'&&!prev.startsWith('stop'))stopSound();
+  if(S.phase==='boom'&&!prev.startsWith('boom')){boomSound();const i=S.players.findIndex(p=>p.id===S.elim);if(i>=0){const [x,y]=ringPos(i,S.players.length);boomFX($('#ring'),x+'%',y+'%')}}
+  if(S.phase==='winner'&&!prev.startsWith('winner')){winSound();confetti()}
+}
+function stageLoop(){
+  if(S){
+    if(S.phase==='playing'){const ms=S.deadline+clockOff-Date.now();setBombTime($('#bomb'),ms,S.fuse);const sec=Math.ceil(ms/1000);if(sec!==lastTickSec&&sec>0){lastTickSec=sec;beep(sec<=3?1100:760,.05,'square',sec<=3?.09:.05)}}
+    else if(S.phase==='stop')setBombTime($('#bomb'),S.remaining,S.fuse);
+    else setBombTime($('#bomb'),S.fuse,S.fuse);
+    if(S.phase==='countdown'||S.phase==='reveal'){renderOverlay();renderCat()}
+  }
+  requestAnimationFrame(stageLoop);
+}
+function onState(s,local){
+  if(!local){ if(s.epoch!==lastEpoch){lastEpoch=s.epoch;lastV=-1} if(s.v<lastV)return; lastV=s.v; clockOff=Date.now()-s.now }
+  const old=S;S=s;
+  if(ROLE==='player'){renderPlayer(old);return}
+  if(old&&old.holder!==S.holder&&S.phase==='playing'&&old.phase==='playing')passSound();
+  layoutRing();renderCat();renderOverlay();if(ROLE==='host')renderCtrl();
+}
+
+/* ---------------- Controles del anfitrión ---------------- */
+let ctrlSig='';
+function renderNet(st){const el=$('#netst');if(el)el.innerHTML=`<span class="${st.p2p==='ok'||st.p2p==='local'?'ok':st.p2p==='bad'?'bad':''}">P2P ${st.p2p==='local'?'(local)':''}</span><span class="${st.mqtt==='ok'||st.mqtt==='local'?'ok':st.mqtt==='bad'?'bad':''}">Respaldo MQTT</span>`;window._netst=st}
+function renderCtrl(){
+  const el=$('#ctrl');if(!el)return;
+  const sig=JSON.stringify([S.phase,S.players,S.fuse,S.cat&&S.cat.key,S.stopBy,S.lastPasser,S.holder]);if(sig===ctrlSig)return;ctrlSig=sig;
+  const q=LOCAL?'&local=1':'';const plink=`${baseURL()}?sala=${ROOM}${q}`,vlink=`${baseURL()}?sala=${ROOM}&rol=ver${q}`;
+  const inGame=S.phase!=='lobby'&&S.phase!=='winner';
+  let h='';
+  if(S.phase==='stop'){
+    h+=`<div class="card box stopbox"><h3>✋ STOP — ¿qué pasó?</h3><div class="mut" style="font-size:14px">${pname(S.stopBy||'__host')} frenó.${S.lastPasser?` Último en responder: <b>${pname(S.lastPasser)}</b>.`:''} La bomba la tiene <b>${pname(S.holder)}</b>.</div>
+      ${S.lastPasser?`<button class="btn red" data-a="resolve" data-v="last">❌ Inválida: elimina a ${pname(S.lastPasser)}</button>`:''}
+      <button class="btn red sm" data-a="resolve" data-v="holder">💣 Elimina a quien tiene la bomba (${pname(S.holder)})</button>
+      <button class="btn grn" data-a="resolve" data-v="go">✅ Era válida: seguir</button>
+      ${S.stopBy&&S.stopBy!=='__host'?`<button class="btn sm" data-a="resolve" data-v="stopper">🤥 STOP falso: elimina a ${pname(S.stopBy)}</button>`:''}</div>`;
+  }
+  if(S.phase==='lobby'){
+    h+=`<div class="card box"><h3>INVITAR</h3><div id="qr" class="hidden"></div>
+      <div class="field"><label>Jugadores</label><div class="linkrow"><input readonly value="${plink}"><button class="btn sm" data-copy="${plink}">Copiar</button></div></div>
+      <div class="field"><label>Espectador (OBS)</label><div class="linkrow"><input readonly value="${vlink}"><button class="btn sm" data-copy="${vlink}">Copiar</button></div></div>
+      <div class="net" id="netst"></div></div>
+      <div class="card box"><h3>MECHA DE LA BOMBA</h3><div class="seg">${[5000,7000,10000,15000].map(v=>`<button data-a="fuse" data-v="${v}" class="${S.fuse===v?'on':''}">${v/1000}s</button>`).join('')}</div></div>`;
+  }
+  h+=`<div class="card box"><h3>JUGADORES ${S.players.length}/6</h3><div class="plist">${S.players.map(p=>`<div class="prow" style="${p.alive?'':'opacity:.45'}"><span class="dot ${p.on?'':'off'}"></span><img src="${SPR(p.av)}"><span class="n">${esc(p.name)}${p.alive?'':' 💀'}</span>${S.phase==='lobby'?`<button class="btn sm" data-a="kick" data-v="${esc(p.id)}">✕</button>`:''}</div>`).join('')||'<div class="mut">Nadie todavía. Compartí el link o el código.</div>'}</div>
+    ${S.phase==='lobby'?`<button class="btn pri" data-a="start" ${S.players.length<2?'disabled':''}>▶ Empezar (${S.players.length<2?'mín. 2':S.players.length+' jugadores'})</button>`:''}
+    ${S.phase==='winner'?`<button class="btn pri" data-a="start">🔁 Revancha</button><button class="btn sm" data-a="lobby">Volver al lobby</button>`:''}</div>`;
+  if(inGame){
+    h+=`<div class="card box"><h3>PARTIDA</h3>${S.phase==='playing'?`<button class="btn red sm" data-a="hostStop">✋ STOP (anfitrión)</button>`:''}
+      <button class="btn sm" data-a="reroll">🎲 Cambiar categoría</button><button class="btn sm" data-a="lobby">⏹ Terminar y volver al lobby</button><div class="net" id="netst"></div></div>`;
+    if(S.cat){const list=catMatches(S.cat.parts);h+=`<div class="card box"><h3>📋 RESPUESTAS VÁLIDAS (${list.length})</h3><div class="mut" style="font-size:12px">Solo lo ves vos. Útil para resolver un STOP.</div><div class="answers">${list.map(p=>`<div>${esc(p[1])}</div>`).join('')}</div></div>`}
+  }
+  h+=`<div class="mut" style="font-size:12px;text-align:center">Tip: el botón 👁 oculta este panel para grabar/transmitir.</div>`;
+  el.innerHTML=h;
+  el.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{audio();const a=b.dataset.a,v=b.dataset.v;hostAct[a](a==='fuse'?+v:v)});
+  el.querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(b.dataset.copy).then(()=>{b.textContent='¡Listo!';setTimeout(()=>b.textContent='Copiar',1200)})});
+  if(window._netst)renderNet(window._netst);
+  if(S.phase==='lobby'&&!LOCAL)loadScript('qr').then(()=>{const box=$('#qr');if(!box)return;const qr=qrcode(0,'M');qr.addData(plink);qr.make();box.innerHTML=qr.createSvgTag(4,0);box.classList.remove('hidden')}).catch(()=>{});
+}
+
+/* =========================================================
+   ESPECTADOR puro (solo mira)
+   ========================================================= */
+function viewerInit(){
+  stageInit(false);
+  const c=new ClientNet(ROOM,m=>{if(m.t==='state')onState(m.s)},()=>{});c.start();
+  const hb=()=>c.send({t:'join',role:'viewer'});hb();setInterval(hb,3000);
+  document.addEventListener('click',()=>audio(),{once:true});
+}
+
+/* =========================================================
+   JUGADOR
+   ========================================================= */
+const PKEY='pkbomba-me';
+let me=null,cnet=null,connMode='conectando',sentTurn=-1;
+function playerInit(){
+  let ses=null;try{ses=JSON.parse(sessionStorage.getItem(PKEY))}catch(e){}
+  const saved=store.get(PKEY)||{};
+  me=ses||{name:saved.name||'',av:saved.av||0};
+  if(!me.id)me.id='p_'+Math.random().toString(36).slice(2,11);
+  if(!me.av)me.av=pickAvatar();
+  saveMe();
+  if(me.room===ROOM&&me.name){startPlayer();return}
+  renderJoin();
+}
+function saveMe(){try{sessionStorage.setItem(PKEY,JSON.stringify(me))}catch(e){}store.set(PKEY,{name:me.name,av:me.av})}
+function pickAvatar(){const favs=[1,4,7,25,39,52,54,94,133,143,147,151,155,158,175,183,196,197,249,255,258,280,302,361,384,393,448,470,471,570,571,607,658,700,722,778,808,823,887,906,909,912,937,959];return Math.random()<.6?pick(favs):1+rnd(1025)}
+function renderJoin(){
+  $('#app').innerHTML=`<div class="screen"><div class="logo home-logo" style="font-size:clamp(40px,11vw,70px)">POKÉBOMBA</div>
+  <div class="card panel"><div class="mut" style="text-align:center">Sala <b style="color:var(--yel);font-family:Bungee">${ROOM}</b></div>
+  <div class="av-pick"><img id="avimg" src="${SPR(me.av)}"><div style="display:flex;flex-direction:column;gap:8px"><b>Tu avatar</b><button class="btn sm" id="reroll">🎲 Otro Pokémon</button></div></div>
+  <div class="field"><label>Tu nombre</label><input id="nm" maxlength="16" placeholder="Ej: Ash" value="${esc(me.name||'')}" autocomplete="off"></div>
+  <button class="btn pri" id="go">Entrar a jugar</button>
+  <a class="mut" style="text-align:center;font-size:13px" href="${baseURL()}?sala=${ROOM}&rol=ver${LOCAL?'&local=1':''}">Solo quiero mirar</a></div></div>`;
+  $('#reroll').onclick=()=>{me.av=pickAvatar();$('#avimg').src=SPR(me.av)};
+  const go=()=>{const n=$('#nm').value.trim();if(!n){$('#nm').focus();return}me.name=n;me.room=ROOM;saveMe();audio();startPlayer()};
+  $('#go').onclick=go;$('#nm').onkeydown=e=>{if(e.key==='Enter')go()};
+}
+function startPlayer(){
+  $('#app').innerHTML=`<div id="player"><div class="card center" style="padding:30px;margin-top:30vh">Conectando a la sala ${ROOM}…</div></div>`;
+  cnet=new ClientNet(ROOM,m=>{if(m.t==='state')onState(m.s)},s=>{connMode=s;const b=$('#connb');if(b)b.classList.toggle('hidden',s==='p2p'||s==='mqtt'||s==='local')});
+  cnet.start();
+  const hb=()=>cnet.send({t:'join',id:me.id,name:me.name,av:me.av});hb();setInterval(hb,2500);
+  document.addEventListener('pointerdown',()=>audio(),{once:true});
+  requestAnimationFrame(playerLoop);
+}
+let pSig='',pTick=-1,pBoomShown=null;
+function renderPlayer(old){
+  const mine=S.players.find(p=>p.id===me.id);
+  const holding=mine&&S.holder===me.id&&['playing','stop','countdown','reveal'].includes(S.phase);
+  if(old&&S.phase==='playing'&&S.holder===me.id&&(old.holder!==me.id||old.phase!=='playing')){try{navigator.vibrate&&navigator.vibrate([120,60,120])}catch(e){}passSound()}
+  if(old&&old.holder===me.id&&S.holder!==me.id)passSound();
+  const sig=JSON.stringify([S.phase,S.players,S.holder,S.cat&&S.cat.key,S.stopBy,S.lastPasser,S.elim,S.winner,connMode,S.turn]);
+  if(sig===pSig)return;pSig=sig;
+  const h=catHTML(S.cat);
+  const nx=S.holder?nextAliveC(S.holder):null;
+  let main='';
+  if(!mine){main=`<div class="pmsg">${S.phase==='lobby'?(S.kicked&&S.kicked.includes(me.id)?'Te sacaron de la sala 😕':S.players.length>=6?'La sala está llena (6/6)':'Entrando…'):'La partida ya empezó. Vas a poder entrar en la próxima.'}</div>`}
+  else if(S.phase==='lobby'){main=`<div class="pmsg">¡Estás adentro! 🎉</div><div class="mut">Esperando que el anfitrión empiece… (${S.players.length}/6)</div>`}
+  else if(S.phase==='reveal'){main=`<div class="pmsg">🎲 Sorteando categoría…</div>`}
+  else if(S.phase==='countdown'){main=holding?`<div class="pmsg" style="color:var(--red)">¡Empezás vos con la bomba!</div>`:`<div class="pmsg">Empieza ${pname(S.holder)}</div>`}
+  else if(S.phase==='playing'||S.phase==='stop'){
+    if(!mine.alive)main=`<div class="pmsg">💀 Quedaste afuera</div><div class="mut">Seguí mirando. Todavía podés tocar STOP.</div>`;
+    if(holding){main=`<div class="p-bomb bomb" id="pbomb" style="position:relative;transform:none;left:auto;top:auto;width:min(58vw,240px)">${bombSVG()}</div>
+      <button class="passbtn" id="pass" ${S.phase!=='playing'?'disabled':''}>💣 ¡PASAR!</button><div class="mut">Decí un Pokémon en voz alta y pasala a <b>${pname(nx)}</b></div>`}
+    else if(mine.alive){main=`<div class="holder-mini"><img src="${SPR(pav(S.holder))}"><div style="text-align:left"><div class="mut" style="font-size:14px">La bomba la tiene</div>${pname(S.holder)}</div></div><div class="bar"><i id="pbar"></i></div>${nx===me.id?'<div class="pmsg" style="color:var(--yel)">⚠️ ¡Después venís vos! Pensá tu respuesta</div>':''}`}
+    if(S.phase==='stop')main=`<div class="big stop-title" style="font-size:64px">¡STOP!</div><div class="pmsg">${pname(S.stopBy||'__host')} ${S.lastPasser?`desconfía de ${pname(S.lastPasser)}`:'frenó el juego'}</div><div class="mut">El anfitrión está decidiendo…</div>`;
+  }
+  else if(S.phase==='boom'){main=`<div class="big boom-title" style="font-size:70px">${S.elimWhy==='boom'?'¡BOOM!':'¡AFUERA!'}</div><div class="pmsg">${S.elim===me.id?'Quedaste eliminado 💥':pname(S.elim)+' quedó afuera'}</div>`}
+  else if(S.phase==='winner'){main=`<div class="winner-av" style="width:180px"><img src="${SPR(pav(S.winner))}"></div><div class="big logo" style="font-size:44px">${S.winner===me.id?'¡GANASTE!':pname(S.winner)+'<br>GANA'}</div>`}
+  const canStop=mine&&S.phase==='playing';
+  $('#app').innerHTML=`<div id="player">
+    <div class="connbar ${connMode==='p2p'||connMode==='mqtt'||connMode==='local'?'hidden':''}" id="connb">Reconectando…</div>
+    <div class="p-top"><img src="${SPR(me.av)}"><div class="who"><b>${esc(me.name)}</b><small>Sala ${ROOM}${S.round?' · Ronda '+S.round:''}</small></div><button class="stopbtn" id="stopb" ${canStop?'':'disabled'}>✋ STOP</button></div>
+    ${S.cat&&S.phase!=='lobby'&&S.phase!=='reveal'?`<div class="card p-cat"><div class="cat-kicker">Categoría</div><div class="cat-title">${h.title}</div><div class="chips">${h.chips}</div></div>`:''}
+    <div class="p-main">${main}</div>
+    <div class="strip">${S.players.map(p=>`<div class="${p.id===S.holder&&['playing','stop'].includes(S.phase)?'h':''} ${p.alive?'':'d'} ${p.id===me.id?'me':''}"><img src="${SPR(p.av)}"><span>${esc(p.name)}</span></div>`).join('')}</div>
+  </div>`;
+  document.body.classList.toggle('danger',!!holding&&S.phase==='playing');
+  const pb=$('#pass');if(pb)pb.onclick=()=>{if(sentTurn===S.turn)return;sentTurn=S.turn;pb.disabled=true;pb.textContent='¡PASADA!';cnet.send({t:'pass',id:me.id,turn:S.turn});passSound()};
+  const sb=$('#stopb');if(sb)sb.onclick=()=>{if(S.phase!=='playing')return;cnet.send({t:'stop',id:me.id,turn:S.turn});sb.disabled=true;stopSound()};
+  if(S.phase==='boom'&&pBoomShown!==S.round+S.elim){pBoomShown=S.round+S.elim;if(S.elim===me.id){boomSound();boomFX(document.body,'50%','45%');try{navigator.vibrate&&navigator.vibrate(600)}catch(e){}}else beep(200,.3,'sine',.2)}
+  if(S.phase==='winner'&&old&&old.phase!=='winner'){winSound();confetti()}
+}
+function playerLoop(){
+  if(S&&S.phase==='playing'){
+    const ms=S.deadline+clockOff-Date.now();
+    const pbomb=$('#pbomb');if(pbomb)setBombTime(pbomb,ms,S.fuse);
+    const bar=$('#pbar');if(bar)bar.style.width=Math.max(0,100*ms/S.fuse)+'%';
+    if(S.holder===me.id){const sec=Math.ceil(ms/1000);if(sec!==pTick&&sec>0){pTick=sec;beep(sec<=3?1100:760,.05,'square',sec<=3?.1:.05)}}
+  }else if(S&&S.phase==='stop'){const pbomb=$('#pbomb');if(pbomb)setBombTime(pbomb,S.remaining,S.fuse)}
+  requestAnimationFrame(playerLoop);
+}
+
+/* ---------------- Arranque ---------------- */
+if(ROLE==='home')renderHome();
+else if(ROLE==='host')hostInit();
+else if(ROLE==='ver')viewerInit();
+else playerInit();
+</script>
+</body>
+</html>
